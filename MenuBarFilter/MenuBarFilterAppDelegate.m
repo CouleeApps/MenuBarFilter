@@ -27,11 +27,11 @@ NSString *window_server = @"Window Server";
 NSString *backstop_menubar = @"Backstop Menubar";
 
 // Undocumented spaces related APIs
-typedef int CGSConnection;
+typedef long CGSConnection;
 extern CGSConnection _CGSDefaultConnection(void);
 typedef void (*CGConnectionNotifyProc)(int data1, int data2, int data3, void* userParameter);
 extern CGError CGSRegisterConnectionNotifyProc(const CGSConnection cid,
-                                               CGConnectionNotifyProc function, int event, void* userParameter);
+            CGConnectionNotifyProc function, int event, void* userParameter);
 
 /* observed that this is sent when Mission Control is activated */
 #define CGSConnectionNotifyEventMissionControl 1204
@@ -65,25 +65,8 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     }
 }
 
-#if USE_EVENT_TAP
-static CGEventRef tap_callback (
-                                CGEventTapProxy proxy,
-                                CGEventType type,
-                                CGEventRef event,
-                                void *refcon
-                                )
-{
-    MenuBarFilterAppDelegate *self = refcon;
-    [self missionControlTapped];
-//    NSLog(@"MC tap %@", event);
-    return NULL;
-}
-#endif
-
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
-
     NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
-
     NSDictionary *appDefaults = [NSMutableDictionary dictionary];
 
     // defaults write org.wezfurlong.MenuBarFilter enableMenu NO
@@ -93,7 +76,6 @@ static CGEventRef tap_callback (
     [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
 
     [defs registerDefaults:appDefaults];
-
     [self enableMenuItem:[defs boolForKey:@"enableMenu"]];
 
     // create invert overlay
@@ -132,8 +114,8 @@ static CGEventRef tap_callback (
     // observe space/workspace changes, including Lion full-screen mode changes
     [nc addObserver:self
            selector:@selector(checkForFullScreen:)
-                                                 name:@"NSWorkspaceActiveSpaceDidChangeNotification"
-                                               object:nil];
+               name:@"NSWorkspaceActiveSpaceDidChangeNotification"
+             object:nil];
 
 
     // add observer for full-screen (not Lion style)
@@ -141,27 +123,6 @@ static CGEventRef tap_callback (
                                         forKeyPath:@"currentSystemPresentationOptions"
                                            options:( NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew )
                                            context:NULL];
-
-    // When mission control launches, if it is canceled using the swipe down gesture,
-    // we have no way to tell that it was canceled.  So we need to snoop on mouse
-    // events and re-show our filter.  My first attempt was using a quartz event tap
-    // but that receives input event while mission control is active.  So I switched
-    // to an NSEvent based monitor instead.  I've kept the tap code here just in case
-    // I need to bring it back again.
-#if USE_EVENT_TAP
-    eventTap = CGEventTapCreate(kCGAnnotatedSessionEventTap, kCGHeadInsertEventTap,
-                                kCGEventTapOptionListenOnly,
-                                CGEventMaskBit(kCGEventMouseMoved) |
-                                CGEventMaskBit(kCGEventKeyUp) | CGEventMaskBit(kCGEventKeyDown),
-                                tap_callback,
-                                self);
-
-    CFRunLoopAddSource(
-                       [[NSRunLoop currentRunLoop] getCFRunLoop],
-                       CFMachPortCreateRunLoopSource(NULL, eventTap, 0),
-                       kCFRunLoopCommonModes);
-    CGEventTapEnable(eventTap, NO);
-#endif
 
     // When full-screen apps hide/show the menu bar
     NSNotificationCenter *dc = [NSDistributedNotificationCenter defaultCenter];
@@ -171,10 +132,7 @@ static CGEventRef tap_callback (
 #if 0
     // I used this to spy on the various notifications
     [nc addObserver:self selector:@selector(GlobalNotificationObserver:) name:NULL object:nil];
-
-    // @"com.apple.HIToolbox.frontMenuBarShown"
-    // @"com.apple.HIToolbox.hideMenuBarShown"
-    [[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(GlobalNotificationObserver:) name:NULL object:nil];
+    [dc addObserver:self selector:@selector(GlobalNotificationObserver:) name:NULL object:nil];
 #endif
 
     // Use undocumented APIs to detect mission control being launched :-/
@@ -190,9 +148,7 @@ static CGEventRef tap_callback (
 
     // show overlays
     [self reposition];
-    [invertWindow orderFront:nil];
-    [hueWindow orderFront:nil];
-    visible = YES;
+    [self showFilter];
 }
 
 - (void) GlobalNotificationObserver:(NSNotification*)notification {
@@ -221,17 +177,11 @@ static CGEventRef tap_callback (
 
     if ( [keyPath isEqualToString:@"currentSystemPresentationOptions"] ) {
         if ( [[change valueForKey:@"new"] boolValue] ) {
-            // hide
-            [hueWindow orderOut:nil];
-            [invertWindow orderOut:nil];
-            visible = NO;
-      //      NSLog(@"currentSystemPresentationOptions -> hiding");
+            [self hideFilter];
+            //      NSLog(@"currentSystemPresentationOptions -> hiding");
         } else {
-            // show
-            [hueWindow orderFront:nil];
-            [invertWindow orderFront:nil];
-            visible = YES;
-      //      NSLog(@"currentSystemPresentationOptions -> making visible");
+            [self showFilter];
+            //      NSLog(@"currentSystemPresentationOptions -> making visible");
         }
         return;
     }
@@ -242,13 +192,15 @@ static CGEventRef tap_callback (
                           context:context];
 }
 
+// When mission control launches, if it is canceled using the swipe down gesture,
+// we have no way to tell that it was canceled.  So we need to snoop on mouse
+// events and re-show our filter.  My first attempt was using a quartz event tap
+// but that receives input event while mission control is active.  So I switched
+// to an NSEvent based monitor instead.
 - (void) missionControlTapped {
     if (inMissionControl) {
     //    NSLog(@"tapped and in mission control; show again");
         inMissionControl = NO;
-#if USE_EVENT_TAP
-        CGEventTapEnable(eventTap, NO);
-#endif
         if (eventMonitor) {
             [NSEvent removeMonitor:eventMonitor];
             eventMonitor = nil;
@@ -258,18 +210,8 @@ static CGEventRef tap_callback (
 }
 
 - (void) missionControlActivated {
-    if (visible) {
-        [hueWindow orderOut:nil];
-        [invertWindow orderOut:nil];
-        visible = NO;
-    //    NSLog(@"missionControlActivated -> hiding");
-    }
-
+    [self hideFilter];
     inMissionControl = TRUE;
-#if USE_EVENT_TAP
-    CGEventTapEnable(eventTap, YES);
-#endif
-
     eventMonitor = [NSEvent
                     addGlobalMonitorForEventsMatchingMask:
                         NSMouseMovedMask|NSKeyDownMask|NSLeftMouseDownMask|NSLeftMouseUpMask|
@@ -279,34 +221,38 @@ static CGEventRef tap_callback (
     }];
 }
 
-- (void) fullScreenHideMenuBar:(NSNotification*)notification {
+- (void) showFilter {
+    if (!visible) {
+        [invertWindow orderFrontRegardless];
+        [hueWindow orderFrontRegardless];
+        visible = YES;
+    }
+}
+
+- (void) hideFilter {
     if (visible) {
         [hueWindow orderOut:nil];
         [invertWindow orderOut:nil];
-        visible = NO;
-    //    NSLog(@"fullScreenHideMenuBar -> hiding");
+        visible = NO;        
     }
+}
+
+- (void) fullScreenHideMenuBar:(NSNotification*)notification {
+    [self hideFilter];
 }
 
 - (void) fullScreenShowMenuBar:(NSNotification*)notification {
-    if (!visible) {
-        [hueWindow orderFront:nil];
-        [invertWindow orderFront:nil];
-        visible = YES;
-    //    NSLog(@"fullScreenShowMenuBar -> making visible");
-    }
+    [self showFilter];
 }
 
 - (void) checkForFullScreen:(NSNotification*)notification {
-    bool show = true;
-
     // Look at the windows on this screen; if we can't find the menubar backstop,
     // we know we're in fullscreen mode
 
     CFArrayRef windows = CGWindowListCopyWindowInfo( kCGWindowListOptionOnScreenOnly, kCGNullWindowID );
     CFIndex i, n;
 
-    show = false;
+    bool show = false;
 
     for (i = 0, n = CFArrayGetCount(windows); i < n; i++) {
         CFDictionaryRef windict = CFArrayGetValueAtIndex(windows, i);
@@ -325,24 +271,18 @@ static CGEventRef tap_callback (
     CFRelease(windows);
 
     if ( show && !visible ) {
-        [hueWindow orderFront:nil];
-        [invertWindow orderFront:nil];
-        visible = YES;
-    //    NSLog(@"checkForFullScreen -> making visible");
+        [self showFilter];
+        //    NSLog(@"checkForFullScreen -> making visible");
+
     }
     else if ( !show && visible ) {
-        [hueWindow orderOut:nil];
-        [invertWindow orderOut:nil];
-        visible = NO;
-    //    NSLog(@"checkForFullScreen -> hiding");
+        [self hideFilter];
+        //    NSLog(@"checkForFullScreen -> hiding");
     } else if (show) {
         // Force them to the front again
-        [invertWindow orderFrontRegardless];
-        [hueWindow orderFrontRegardless];
-   //     NSLog(@"checkForFullScreen show + visible");
+        [self showFilter];
+        //     NSLog(@"checkForFullScreen show + visible");
     }
-
-
 }
 
 @end

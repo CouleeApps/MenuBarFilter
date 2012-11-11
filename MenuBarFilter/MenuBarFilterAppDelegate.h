@@ -29,9 +29,6 @@
     MenuBarFilterWindow * invertWindow;
     MenuBarFilterWindow * hueWindow;
     BOOL visible;
-#if USE_EVENT_TAP
-    CFMachPortRef eventTap;
-#endif
     BOOL inMissionControl;
     id eventMonitor;
     NSStatusItem *statusItem;
@@ -43,5 +40,9 @@
 - (void) checkForFullScreen:(NSNotification*)notification;
 - (void) fullScreenShowMenuBar:(NSNotification*)notification;
 - (void) fullScreenHideMenuBar:(NSNotification*)notification;
+
+- (void) showFilter;
+- (void) hideFilter;
+
 
 @end

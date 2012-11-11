@@ -51,11 +51,10 @@ CGSConnection cid;
         [self setHidesOnDeactivate:NO];
         [self setCanHide:NO];
         [self setIgnoresMouseEvents:YES];
-        [self setLevel:CGWindowLevelForKey(kCGCursorWindowLevelKey)];
         [self setOpaque: NO];
         [self setBackgroundColor:[NSColor colorWithDeviceWhite:0.0 alpha:0.0]];
 
-        [self setLevel:kCGMaximumWindowLevel];
+        [self setLevel:kCGStatusWindowLevel+1];
 
         [self setCollectionBehavior:
             NSWindowCollectionBehaviorCanJoinAllSpaces |

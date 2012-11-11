@@ -15,7 +15,23 @@
 		DAF6AEF2136D713B00AAA185 /* MenuBarFilter.icns in Resources */ = {isa = PBXBuildFile; fileRef = DAF6AEF1136D713B00AAA185 /* MenuBarFilter.icns */; };
 		F210F82915607720006F2CC9 /* NocturneMenu.png in Resources */ = {isa = PBXBuildFile; fileRef = F210F82715607720006F2CC9 /* NocturneMenu.png */; };
 		F210F82A15607720006F2CC9 /* NocturneMenuPressed.png in Resources */ = {isa = PBXBuildFile; fileRef = F210F82815607720006F2CC9 /* NocturneMenuPressed.png */; };
+		F2F7763F16504921009AEE12 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F2F7763E16504921009AEE12 /* Sparkle.framework */; };
+		F2F7764116504977009AEE12 /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = F2F7763E16504921009AEE12 /* Sparkle.framework */; };
+		F2F7764316505257009AEE12 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = F2F7764216505257009AEE12 /* dsa_pub.pem */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F2F776401650495E009AEE12 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F2F7764116504977009AEE12 /* Sparkle.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		DA1560221316DB29001F271A /* MenuBarFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -31,6 +47,8 @@
 		DAF6AEF1136D713B00AAA185 /* MenuBarFilter.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = MenuBarFilter.icns; sourceTree = "<group>"; };
 		F210F82715607720006F2CC9 /* NocturneMenu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NocturneMenu.png; sourceTree = "<group>"; };
 		F210F82815607720006F2CC9 /* NocturneMenuPressed.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NocturneMenuPressed.png; sourceTree = "<group>"; };
+		F2F7763E16504921009AEE12 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
+		F2F7764216505257009AEE12 /* dsa_pub.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = dsa_pub.pem; path = MenuBarFilter/dsa_pub.pem; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +57,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA1560271316DB29001F271A /* Cocoa.framework in Frameworks */,
+				F2F7763F16504921009AEE12 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -48,6 +67,7 @@
 		DA1560171316DB29001F271A = {
 			isa = PBXGroup;
 			children = (
+				F2F7764216505257009AEE12 /* dsa_pub.pem */,
 				F210F82715607720006F2CC9 /* NocturneMenu.png */,
 				F210F82815607720006F2CC9 /* NocturneMenuPressed.png */,
 				DAF6AEF1136D713B00AAA185 /* MenuBarFilter.icns */,
@@ -68,6 +88,7 @@
 		DA1560251316DB29001F271A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F2F7763E16504921009AEE12 /* Sparkle.framework */,
 				DA1560261316DB29001F271A /* Cocoa.framework */,
 			);
 			name = Frameworks;
@@ -98,6 +119,7 @@
 				DA15601E1316DB29001F271A /* Sources */,
 				DA15601F1316DB29001F271A /* Frameworks */,
 				DA1560201316DB29001F271A /* Resources */,
+				F2F776401650495E009AEE12 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -114,7 +136,7 @@
 		DA1560191316DB29001F271A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0440;
+				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = "";
 			};
 			buildConfigurationList = DA15601C1316DB29001F271A /* Build configuration list for PBXProject "MenuBarFilter" */;
@@ -143,6 +165,7 @@
 				DAF6AEF2136D713B00AAA185 /* MenuBarFilter.icns in Resources */,
 				F210F82915607720006F2CC9 /* NocturneMenu.png in Resources */,
 				F210F82A15607720006F2CC9 /* NocturneMenuPressed.png in Resources */,
+				F2F7764316505257009AEE12 /* dsa_pub.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +234,11 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../Sparkle 1.5b6\"",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -232,6 +260,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../Sparkle 1.5b6\"",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MenuBarFilter/MenuBarFilter-Prefix.pch";

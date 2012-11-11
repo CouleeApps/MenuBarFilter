@@ -1,3 +1,5 @@
 .DS_Store
 xcuserdata
-
+MenuBarFilter/dsa_priv.pem
+MenuBarFilter/appcast.xml
+MenuBarFilter/*.zip
