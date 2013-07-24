@@ -81,6 +81,10 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     // create invert overlay
     invertWindow = [[MenuBarFilterWindow alloc] init];
     [invertWindow setFilter:@"CIColorInvert"];
+	
+	// create border overlay
+    borderWindow = [[MenuBarFilterWindow alloc] init];
+	[borderWindow setBackgroundColor: NSColor.blackColor];
 
     hueWindow = [[MenuBarFilterWindow alloc] init];
     if ([defs boolForKey:@"useHue"]) {
@@ -158,16 +162,21 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 - (void) reposition {
     NSRect frame = [[NSScreen mainScreen] frame];
     NSRect vframe = [[NSScreen mainScreen] visibleFrame];
+	NSRect borderFrame = [[NSScreen mainScreen] visibleFrame];
 
     NSLog(@"frame o=%f h=%f, vframe o=%f h=%f", frame.origin.y, frame.size.height, vframe.origin.y, vframe.size.height);
 
     frame.origin.y = vframe.size.height + vframe.origin.y + 1;
     frame.size.height -= (vframe.size.height + vframe.origin.y);
+	
+	borderFrame.origin.y = frame.origin.y - 1;
+	borderFrame.size.height = 1;
 
     NSLog(@"Using %f %f", frame.origin.y, frame.size.height);
-
+	
     [hueWindow setFrame:frame display:NO];
     [invertWindow setFrame:frame display:NO];
+	[borderWindow setFrame:borderFrame display:NO];
 }
 
 - (void) observeValueForKeyPath:(NSString *)keyPath
@@ -225,6 +234,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     if (!visible) {
         [invertWindow orderFrontRegardless];
         [hueWindow orderFrontRegardless];
+		[borderWindow orderFrontRegardless];
         visible = YES;
     }
 }
@@ -233,6 +243,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     if (visible) {
         [hueWindow orderOut:nil];
         [invertWindow orderOut:nil];
+		[borderWindow orderOut:nil];
         visible = NO;        
     }
 }

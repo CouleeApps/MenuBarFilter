@@ -28,6 +28,7 @@
 @private
     MenuBarFilterWindow * invertWindow;
     MenuBarFilterWindow * hueWindow;
+	MenuBarFilterWindow * borderWindow;
     BOOL visible;
     BOOL inMissionControl;
     id eventMonitor;
