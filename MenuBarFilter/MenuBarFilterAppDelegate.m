@@ -103,7 +103,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
             forKey: @"inputBrightness" ] ];
         [hueWindow setFilterValues:
-            [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.8]
+            [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
             forKey: @"inputContrast" ] ];
     }
 
