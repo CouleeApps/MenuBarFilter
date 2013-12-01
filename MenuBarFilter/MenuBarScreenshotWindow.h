@@ -30,6 +30,7 @@
    
    NSImageView *imageView;
    Controller *controller;
+   id eventHandler;
 }
 
 @property (nonatomic, strong) Controller *controller;

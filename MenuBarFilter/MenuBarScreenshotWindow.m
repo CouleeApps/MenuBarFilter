@@ -54,9 +54,32 @@
       [imageView setImageScaling:NSImageScaleNone];
       [imageView setImageAlignment:NSImageAlignTop];
       
-      [self setAcceptsMouseMovedEvents:YES];
+      [NSThread detachNewThreadSelector:@selector(updateLoop) toTarget:self withObject:nil];
+      
+      eventHandler = [NSEvent addGlobalMonitorForEventsMatchingMask:NSMouseMovedMask handler:^(NSEvent * mouseEvent) {
+         NSLog(@"Mouse moved: %@", NSStringFromPoint([mouseEvent locationInWindow]));
+         //[controller update];
+      }];
    }
    return self;
+}
+
+- (void)updateLoop {
+   while (self) {
+      if (self.isVisible)
+         @autoreleasepool {
+            [self update];
+         }
+      usleep(100000);
+   }
+}
+
+- (void)update {
+   [controller update];
+}
+
+- (void)dealloc {
+   [NSEvent removeMonitor:eventHandler];
 }
 
 - (void)setFrame:(NSRect)frameRect display:(BOOL)flag {
@@ -66,13 +89,5 @@
    [imageView setFrame:NSMakeRect(0, 0, frameRect.size.width, frameRect.size.height)];
 }
 
-- (void)mouseEntered:(NSEvent *)theEvent {
-   [controller update];
-}
-
-- (void)mouseMoved:(NSEvent *)theEvent {
-   NSLog(@"%@", NSStringFromPoint([self convertScreenToBase:[theEvent locationInWindow]]));
-   [controller update];
-}
-
 @end
+   

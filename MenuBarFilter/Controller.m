@@ -81,6 +81,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 }
 
 - (void)setOutputImage:(CGImageRef)cgImage {
+   StopwatchStart();
 	if (cgImage != NULL) {
 		// Create a bitmap rep from the image...
       CIImage *image = [CIImage imageWithCGImage:cgImage];
@@ -116,6 +117,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
       NSLog(@"Image is null");
 		[outputView setImage:nil];
 	}
+	StopwatchEnd("Outputting Image");
 }
 
 #pragma mark Window Image Methods
