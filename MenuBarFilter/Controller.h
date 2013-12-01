@@ -46,6 +46,18 @@ Copyright (C) 2010 Apple Inc. All Rights Reserved.
 */
 
 #import <Cocoa/Cocoa.h>
+#import "CGSPrivate.h"
+
+typedef enum
+{
+	// Constants that correspond to the rows in the
+	// Single Window Option matrix.
+	kSingleWindowAboveOnly = 0,
+	kSingleWindowAboveIncluded = 1,
+	kSingleWindowOnly = 2,
+	kSingleWindowBelowIncluded = 3,
+	kSingleWindowBelowOnly = 4,
+} SingleWindowOption;
 
 @interface Controller : NSWindowController
 {
@@ -64,9 +76,16 @@ Copyright (C) 2010 Apple Inc. All Rights Reserved.
 	CGWindowListOption singleWindowListOptions;
 	CGWindowImageOption imageOptions;
 	CGRect imageBounds;
+   
+   CGSWindow windowId;
+   SingleWindowOption windowOption;
 }
 
 @property (nonatomic, strong) NSImageView *outputView;
+
+- (void)setWindowId:(CGSWindow)newWindowId;
+- (void)setSingleWindowOption:(SingleWindowOption)option;
+- (void)setTightFit:(BOOL)fit;
 
 // List Options
 -(IBAction)toggleOffscreenWindows:(id)sender;

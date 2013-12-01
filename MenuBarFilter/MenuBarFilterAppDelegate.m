@@ -115,6 +115,10 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
    } else {
       screenshotWindow = [[MenuBarScreenshotWindow alloc] init];
       
+      [controller setWindowId:(CGSWindow)screenshotWindow.windowNumber];
+      [controller setSingleWindowOption:kSingleWindowBelowOnly];
+      [controller setTightFit:NO];
+      
       //GS- Have the controller output to the menu bar
       controller.outputView = screenshotWindow.imageView;
    }

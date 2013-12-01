@@ -282,45 +282,27 @@ void WindowListApplierFunction(const void *inputDictionary, void *context)
 
 -(void)updateImageWithSelection
 {
-	// Depending on how much is selected either clear the output image
-	// set the image based on a single selected window or
-	// set the image based on multiple selected windows.
-	NSArray *selection = [arrayController selectedObjects];
-	if([selection count] == 0)
+	// Depending on how much is selected either clear the output image or
+	// set the image based on a single selected window
+
+   //GS- Removed most of this so it can take a window ID passed in via -setWindowId:
+	if(windowId == 0)
 	{
 		[self setOutputImage:NULL];
 	}
-	else if([selection count] == 1)
-	{
-		// Single window selected, so use the single window options.
-		// Need to grab the CGWindowID to pass to the method.
-		CGWindowID windowID = [[[selection objectAtIndex:0] objectForKey:kWindowIDKey] unsignedIntValue];
-		[self createSingleWindowShot:windowID];
-	}
 	else
 	{
-		// Multiple windows selected, so composite just those windows
-		[self createMultiWindowShot:selection];
+		// Single window selected, so use the single window options.
+		[self createSingleWindowShot:windowId];
 	}
 }
-
-enum
-{
-	// Constants that correspond to the rows in the
-	// Single Window Option matrix.
-	kSingleWindowAboveOnly = 0,
-	kSingleWindowAboveIncluded = 1,
-	kSingleWindowOnly = 2,
-	kSingleWindowBelowIncluded = 3,
-	kSingleWindowBelowOnly = 4,
-};
 
 // Simple helper that converts the selected row number of the singleWindow NSMatrix
 // to the appropriate CGWindowListOption.
 -(CGWindowListOption)singleWindowOption
 {
 	CGWindowListOption option = 0;
-	switch([singleWindow selectedRow])
+	switch (windowOption)
 	{
 		case kSingleWindowAboveOnly:
 			option = kCGWindowListOptionOnScreenAboveWindow;
@@ -469,6 +451,23 @@ NSString *kvoContext = @"SonOfGrabContext";
 #pragma unused(sender)
 	// Refreshing the window list combines updating the window list and updating the window image.
 	[self updateWindowList];
+	[self updateImageWithSelection];
+}
+
+- (void)setWindowId:(CGSWindow)newWindowId {
+   windowId = newWindowId;
+	singleWindowListOptions = [self singleWindowOption];
+   [self updateImageWithSelection];
+}
+
+- (void)setSingleWindowOption:(SingleWindowOption)option {
+   windowOption = option;
+   singleWindowListOptions = [self singleWindowOption];
+	[self updateImageWithSelection];
+}
+
+- (void)setTightFit:(BOOL)fit {
+	imageBounds = (fit ? CGRectNull : CGRectInfinite);
 	[self updateImageWithSelection];
 }
 
