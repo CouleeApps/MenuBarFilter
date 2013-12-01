@@ -21,10 +21,12 @@
 
 #include "MenuBarFilterWindow.h"
 #include "MenuBarScreenshotWindow.h"
+#include "Controller.h"
 
 @interface MenuBarFilterAppDelegate : NSObject <NSApplicationDelegate> {
 
     IBOutlet NSMenu *statusMenu;
+    IBOutlet Controller *controller;
 
 @private
     MenuBarFilterWindow * invertWindow;

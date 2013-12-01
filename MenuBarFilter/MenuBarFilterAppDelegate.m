@@ -114,6 +114,9 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
       }
    } else {
       screenshotWindow = [[MenuBarScreenshotWindow alloc] init];
+      
+      //GS- Have the controller output to the menu bar
+      controller.outputView = screenshotWindow.imageView;
    }
 
     // add observer for screen changes

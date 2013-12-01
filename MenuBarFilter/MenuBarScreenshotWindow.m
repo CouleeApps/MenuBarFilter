@@ -49,6 +49,10 @@
       imageView = [[NSImageView alloc] initWithFrame:self.frame];
       [self.contentView addSubview:imageView];
       [imageView setAutoresizingMask:NSMinXEdge | NSMaxXEdge | NSMinYEdge | NSMaxYEdge];
+      
+      //GS- Align to the top
+      [imageView setImageScaling:NSImageScaleNone];
+      [imageView setImageAlignment:NSImageAlignTop];
    }
    return self;
 }
