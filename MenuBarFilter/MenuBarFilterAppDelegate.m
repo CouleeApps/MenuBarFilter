@@ -58,47 +58,63 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     }
 }
 
+- (BOOL)filterWindowsBroken {
+   NSString *osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
+   //Version 10.9 (Build 13A603)
+   
+   int osMajor = [[[osVersion componentsSeparatedByString:@" "][1] componentsSeparatedByString:@"."][0] intValue];
+   int osMinor = [[[osVersion componentsSeparatedByString:@" "][1] componentsSeparatedByString:@"."][1] intValue];
+   
+   //GS- I assume future versions will also have this broken
+   return (osMajor == 10 && osMinor >= 9) || osMajor > 10 /* Future compatibility */;
+}
+
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
-    NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
-    NSDictionary *appDefaults = [NSMutableDictionary dictionary];
-
-    // defaults write org.wezfurlong.MenuBarFilter enableMenu NO
-    [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"enableMenu"];
-
-    // defaults write org.wezfurlong.MenuBarFilter useHue NO
-    [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
-
-    [defs registerDefaults:appDefaults];
-    [self enableMenuItem:[defs boolForKey:@"enableMenu"]];
-
-    // create invert overlay
-    invertWindow = [[MenuBarFilterWindow alloc] init];
-    [invertWindow setFilter:@"CIColorInvert"];
-	
-	// create border overlay
-    borderWindow = [[MenuBarFilterWindow alloc] init];
-	[borderWindow setBackgroundColor: NSColor.blackColor];
-
-    hueWindow = [[MenuBarFilterWindow alloc] init];
-    if ([defs boolForKey:@"useHue"]) {
-        // create hue overlay
-        [hueWindow setFilter:@"CIHueAdjust"];
-        [hueWindow setFilterValues:
-             [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:M_PI],
-              @"inputAngle", nil]];
-    } else {
-        // de-saturation filter
-        [hueWindow setFilter:@"CIColorControls"];
-        [hueWindow setFilterValues:
-            [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
-            forKey: @"inputSaturation" ] ];
-        [hueWindow setFilterValues:
-            [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
-            forKey: @"inputBrightness" ] ];
-        [hueWindow setFilterValues:
-            [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
-            forKey: @"inputContrast" ] ];
-    }
+   //GS- All of this is broken in Mavericks.
+   if (![self filterWindowsBroken]) {
+      NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
+      NSDictionary *appDefaults = [NSMutableDictionary dictionary];
+      
+      // defaults write org.wezfurlong.MenuBarFilter enableMenu NO
+      [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"enableMenu"];
+      
+      // defaults write org.wezfurlong.MenuBarFilter useHue NO
+      [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
+      
+      [defs registerDefaults:appDefaults];
+      [self enableMenuItem:[defs boolForKey:@"enableMenu"]];
+      
+      // create invert overlay
+      invertWindow = [[MenuBarFilterWindow alloc] init];
+      [invertWindow setFilter:@"CIColorInvert"];
+      
+      // create border overlay
+      borderWindow = [[MenuBarFilterWindow alloc] init];
+      [borderWindow setBackgroundColor: NSColor.blackColor];
+      
+      hueWindow = [[MenuBarFilterWindow alloc] init];
+      if ([defs boolForKey:@"useHue"]) {
+         // create hue overlay
+         [hueWindow setFilter:@"CIHueAdjust"];
+         [hueWindow setFilterValues:
+          [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:M_PI],
+           @"inputAngle", nil]];
+      } else {
+         // de-saturation filter
+         [hueWindow setFilter:@"CIColorControls"];
+         [hueWindow setFilterValues:
+          [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
+                                      forKey: @"inputSaturation" ] ];
+         [hueWindow setFilterValues:
+          [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
+                                      forKey: @"inputBrightness" ] ];
+         [hueWindow setFilterValues:
+          [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
+                                      forKey: @"inputContrast" ] ];
+      }
+   } else {
+      screenshotWindow = [[MenuBarScreenshotWindow alloc] init];
+   }
 
     // add observer for screen changes
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -167,9 +183,13 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
     NSLog(@"Using %f %f", frame.origin.y, frame.size.height);
 	
-    [hueWindow setFrame:frame display:NO];
-    [invertWindow setFrame:frame display:NO];
-	[borderWindow setFrame:borderFrame display:NO];
+   if ([self filterWindowsBroken]) {
+      [screenshotWindow setFrame:frame display:NO];
+   } else {
+      [hueWindow setFrame:frame display:NO];
+      [invertWindow setFrame:frame display:NO];
+      [borderWindow setFrame:borderFrame display:NO];
+   }
 }
 
 - (void) observeValueForKeyPath:(NSString *)keyPath
@@ -225,19 +245,27 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
 - (void) showFilter {
     if (!visible) {
-        [invertWindow orderFrontRegardless];
-        [hueWindow orderFrontRegardless];
-		[borderWindow orderFrontRegardless];
+       if ([self filterWindowsBroken]) {
+          [screenshotWindow orderFrontRegardless];
+       } else {
+          [invertWindow orderFrontRegardless];
+          [hueWindow orderFrontRegardless];
+          [borderWindow orderFrontRegardless];
+       }
         visible = YES;
     }
 }
 
 - (void) hideFilter {
     if (visible) {
-        [hueWindow orderOut:nil];
-        [invertWindow orderOut:nil];
-		[borderWindow orderOut:nil];
-        visible = NO;        
+       if ([self filterWindowsBroken]) {
+          [screenshotWindow orderOut:nil];
+       } else {
+          [hueWindow orderOut:nil];
+          [invertWindow orderOut:nil];
+          [borderWindow orderOut:nil];
+       }
+        visible = NO;
     }
 }
 

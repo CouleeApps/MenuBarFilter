@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		B57F7C6A184B152000A75E30 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = B57F7C69184B152000A75E30 /* Controller.m */; };
+		B57F7C71184B160300A75E30 /* MenuBarScreenshotWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = B57F7C70184B160300A75E30 /* MenuBarScreenshotWindow.m */; };
+		B57F7C75184B195E00A75E30 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B57F7C72184B195E00A75E30 /* ApplicationServices.framework */; };
+		B57F7C76184B195E00A75E30 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B57F7C73184B195E00A75E30 /* CoreGraphics.framework */; };
+		B57F7C77184B195E00A75E30 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B57F7C74184B195E00A75E30 /* QuartzCore.framework */; };
 		DA1560271316DB29001F271A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA1560261316DB29001F271A /* Cocoa.framework */; };
 		DA1560341316DB29001F271A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1560331316DB29001F271A /* main.m */; };
 		DA15603A1316DB29001F271A /* MenuBarFilterAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1560391316DB29001F271A /* MenuBarFilterAppDelegate.m */; };
@@ -38,6 +42,11 @@
 		B57F7C67184B137900A75E30 /* CGSPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CGSPrivate.h; path = ../CGSPrivate.h; sourceTree = "<group>"; };
 		B57F7C68184B152000A75E30 /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		B57F7C69184B152000A75E30 /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
+		B57F7C6F184B160300A75E30 /* MenuBarScreenshotWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MenuBarScreenshotWindow.h; sourceTree = "<group>"; };
+		B57F7C70184B160300A75E30 /* MenuBarScreenshotWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MenuBarScreenshotWindow.m; sourceTree = "<group>"; };
+		B57F7C72184B195E00A75E30 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
+		B57F7C73184B195E00A75E30 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		B57F7C74184B195E00A75E30 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		DA1560221316DB29001F271A /* MenuBarFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA1560261316DB29001F271A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DA15602E1316DB29001F271A /* MenuBarFilter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MenuBarFilter-Info.plist"; sourceTree = "<group>"; };
@@ -60,6 +69,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B57F7C75184B195E00A75E30 /* ApplicationServices.framework in Frameworks */,
+				B57F7C76184B195E00A75E30 /* CoreGraphics.framework in Frameworks */,
+				B57F7C77184B195E00A75E30 /* QuartzCore.framework in Frameworks */,
 				DA1560271316DB29001F271A /* Cocoa.framework in Frameworks */,
 				F2F7763F16504921009AEE12 /* Sparkle.framework in Frameworks */,
 			);
@@ -95,6 +107,8 @@
 			children = (
 				B57F7C68184B152000A75E30 /* Controller.h */,
 				B57F7C69184B152000A75E30 /* Controller.m */,
+				B57F7C6F184B160300A75E30 /* MenuBarScreenshotWindow.h */,
+				B57F7C70184B160300A75E30 /* MenuBarScreenshotWindow.m */,
 			);
 			name = "Post-Mavericks Support";
 			sourceTree = "<group>";
@@ -132,6 +146,9 @@
 		DA1560251316DB29001F271A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B57F7C72184B195E00A75E30 /* ApplicationServices.framework */,
+				B57F7C73184B195E00A75E30 /* CoreGraphics.framework */,
+				B57F7C74184B195E00A75E30 /* QuartzCore.framework */,
 				F2F7763E16504921009AEE12 /* Sparkle.framework */,
 				DA1560261316DB29001F271A /* Cocoa.framework */,
 			);
@@ -220,6 +237,7 @@
 				DA15603A1316DB29001F271A /* MenuBarFilterAppDelegate.m in Sources */,
 				DA1560451316DB82001F271A /* MenuBarFilterWindow.m in Sources */,
 				B57F7C6A184B152000A75E30 /* Controller.m in Sources */,
+				B57F7C71184B160300A75E30 /* MenuBarScreenshotWindow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

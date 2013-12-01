@@ -60,8 +60,6 @@ Copyright (C) 2010 Apple Inc. All Rights Reserved.
 	IBOutlet NSButton * imageTightFit;
 	IBOutlet NSMatrix * singleWindow;
 
-   IBOutlet NSSlider * gammaSlider;
-
 	CGWindowListOption listOptions;
 	CGWindowListOption singleWindowListOptions;
 	CGWindowImageOption imageOptions;

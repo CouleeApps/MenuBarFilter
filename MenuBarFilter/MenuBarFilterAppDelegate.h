@@ -20,6 +20,7 @@
  */
 
 #include "MenuBarFilterWindow.h"
+#include "MenuBarScreenshotWindow.h"
 
 @interface MenuBarFilterAppDelegate : NSObject <NSApplicationDelegate> {
 
@@ -28,7 +29,8 @@
 @private
     MenuBarFilterWindow * invertWindow;
     MenuBarFilterWindow * hueWindow;
-	MenuBarFilterWindow * borderWindow;
+	 MenuBarFilterWindow * borderWindow;
+    MenuBarScreenshotWindow * screenshotWindow;
     BOOL visible;
     BOOL inMissionControl;
     id eventMonitor;
