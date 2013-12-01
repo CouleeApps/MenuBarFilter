@@ -22,14 +22,17 @@
 
 #import <Cocoa/Cocoa.h>
 #import "CGSPrivate.h"
+#import "Controller.h"
 
 @interface MenuBarScreenshotWindow : NSWindow {
 @private
 	CGSWindow window;
    
    NSImageView *imageView;
+   Controller *controller;
 }
 
+@property (nonatomic, strong) Controller *controller;
 @property (nonatomic, strong) NSImageView *imageView;
 
 @end

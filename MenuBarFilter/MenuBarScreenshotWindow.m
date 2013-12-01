@@ -23,7 +23,7 @@
 #import "MenuBarScreenshotWindow.h"
 
 @implementation MenuBarScreenshotWindow
-@synthesize imageView;
+@synthesize imageView, controller;
 
 - (id) init {
    self = [self initWithContentRect:[[NSScreen mainScreen] frame]
@@ -53,6 +53,8 @@
       //GS- Align to the top
       [imageView setImageScaling:NSImageScaleNone];
       [imageView setImageAlignment:NSImageAlignTop];
+      
+      [self setAcceptsMouseMovedEvents:YES];
    }
    return self;
 }
@@ -62,6 +64,15 @@
    
    //Full-screen
    [imageView setFrame:NSMakeRect(0, 0, frameRect.size.width, frameRect.size.height)];
+}
+
+- (void)mouseEntered:(NSEvent *)theEvent {
+   [controller update];
+}
+
+- (void)mouseMoved:(NSEvent *)theEvent {
+   NSLog(@"%@", NSStringFromPoint([self convertScreenToBase:[theEvent locationInWindow]]));
+   [controller update];
 }
 
 @end

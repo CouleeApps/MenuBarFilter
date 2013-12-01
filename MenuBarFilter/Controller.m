@@ -223,6 +223,10 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 
 #pragma mark Control Actions
 
+- (void)update {
+   [self updateImageWithSelection];
+}
+
 - (void)setWindowId:(CGSWindow)newWindowId {
    windowId = newWindowId;
 	singleWindowListOptions = [self singleWindowOption];

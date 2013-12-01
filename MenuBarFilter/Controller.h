@@ -74,6 +74,7 @@ typedef enum
 
 @property (nonatomic, strong) NSImageView *outputView;
 
+- (void)update;
 - (void)setWindowId:(CGSWindow)newWindowId;
 - (void)setSingleWindowOption:(SingleWindowOption)option;
 - (void)setTightFit:(BOOL)fit;
