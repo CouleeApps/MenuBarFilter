@@ -127,114 +127,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	}
 }
 
-#pragma mark Window List & Window Image Methods
-typedef struct
-{
-	// Where to add window information
-	NSMutableArray * outputArray;
-	// Tracks the index of the window when first inserted
-	// so that we can always request that the windows be drawn in order.
-	int order;
-} WindowListApplierData;
-
-NSString *kAppNameKey = @"applicationName";	// Application Name & PID
-NSString *kWindowOriginKey = @"windowOrigin";	// Window Origin as a string
-NSString *kWindowSizeKey = @"windowSize";		// Window Size as a string
-NSString *kWindowIDKey = @"windowID";			// Window ID
-NSString *kWindowLevelKey = @"windowLevel";	// Window Level
-NSString *kWindowOrderKey = @"windowOrder";	// The overall front-to-back ordering of the windows as returned by the window server
-
-void WindowListApplierFunction(const void *inputDictionary, void *context);
-void WindowListApplierFunction(const void *inputDictionary, void *context)
-{
-	NSDictionary *entry = (NSDictionary*)inputDictionary;
-	WindowListApplierData *data = (WindowListApplierData*)context;
-	
-	// The flags that we pass to CGWindowListCopyWindowInfo will automatically filter out most undesirable windows.
-	// However, it is possible that we will get back a window that we cannot read from, so we'll filter those out manually.
-	int sharingState = [[entry objectForKey:(id)kCGWindowSharingState] intValue];
-	if(sharingState != kCGWindowSharingNone)
-	{
-		NSMutableDictionary *outputEntry = [NSMutableDictionary dictionary];
-		
-		// Grab the application name, but since it's optional we need to check before we can use it.
-		NSString *applicationName = [entry objectForKey:(id)kCGWindowOwnerName];
-		if(applicationName != NULL)
-		{
-			// PID is required so we assume it's present.
-			NSString *nameAndPID = [NSString stringWithFormat:@"%@ (%@)", applicationName, [entry objectForKey:(id)kCGWindowOwnerPID]];
-			[outputEntry setObject:nameAndPID forKey:kAppNameKey];
-		}
-		else
-		{
-			// The application name was not provided, so we use a fake application name to designate this.
-			// PID is required so we assume it's present.
-			NSString *nameAndPID = [NSString stringWithFormat:@"((unknown)) (%@)", [entry objectForKey:(id)kCGWindowOwnerPID]];
-			[outputEntry setObject:nameAndPID forKey:kAppNameKey];
-		}
-		
-		// Grab the Window Bounds, it's a dictionary in the array, but we want to display it as a string
-		CGRect bounds;
-		CGRectMakeWithDictionaryRepresentation((CFDictionaryRef)[entry objectForKey:(id)kCGWindowBounds], &bounds);
-		NSString *originString = [NSString stringWithFormat:@"%.0f/%.0f", bounds.origin.x, bounds.origin.y];
-		[outputEntry setObject:originString forKey:kWindowOriginKey];
-		NSString *sizeString = [NSString stringWithFormat:@"%.0f*%.0f", bounds.size.width, bounds.size.height];
-		[outputEntry setObject:sizeString forKey:kWindowSizeKey];
-		
-		// Grab the Window ID & Window Level. Both are required, so just copy from one to the other
-		[outputEntry setObject:[entry objectForKey:(id)kCGWindowNumber] forKey:kWindowIDKey];
-		[outputEntry setObject:[entry objectForKey:(id)kCGWindowLayer] forKey:kWindowLevelKey];
-		
-		// Finally, we are passed the windows in order from front to back by the window server
-		// Should the user sort the window list we want to retain that order so that screen shots
-		// look correct no matter what selection they make, or what order the items are in. We do this
-		// by maintaining a window order key that we'll apply later.
-		[outputEntry setObject:[NSNumber numberWithInt:data->order] forKey:kWindowOrderKey];
-		data->order++;
-		
-		[data->outputArray addObject:outputEntry];
-	}
-}
-
--(void)updateWindowList
-{
-	// Ask the window server for the list of windows.
-	StopwatchStart();
-	CFArrayRef windowList = CGWindowListCopyWindowInfo(listOptions, kCGNullWindowID);
-	StopwatchEnd("Create Window List");
-	
-	// Copy the returned list, further pruned, to another list. This also adds some bookkeeping
-	// information to the list as well as
-	NSMutableArray * prunedWindowList = [NSMutableArray array];
-	WindowListApplierData data = {prunedWindowList, 0};
-	CFArrayApplyFunction(windowList, CFRangeMake(0, CFArrayGetCount(windowList)), &WindowListApplierFunction, &data);
-	CFRelease(windowList);
-}
-
--(CFArrayRef)newWindowListFromSelection:(NSArray*)selection
-{
-	// Create a sort descriptor array. It consists of a single descriptor that sorts based on the kWindowOrderKey in ascending order
-	NSArray * sortDescriptors = [NSArray arrayWithObject:[[[NSSortDescriptor alloc] initWithKey:kWindowOrderKey ascending:YES] autorelease]];
-   
-	// Next sort the selection based on that sort descriptor array
-	NSArray * sortedSelection = [selection sortedArrayUsingDescriptors:sortDescriptors];
-   
-	// Now we Collect the CGWindowIDs from the sorted selection
-	CGWindowID *windowIDs = calloc([sortedSelection count], sizeof(CGWindowID));
-	int i = 0;
-	for(NSMutableDictionary *entry in sortedSelection)
-	{
-		windowIDs[i++] = [[entry objectForKey:kWindowIDKey] unsignedIntValue];
-	}
-	// CGWindowListCreateImageFromArray expect a CFArray of *CGWindowID*, not CGWindowID wrapped in a CF/NSNumber
-	// Hence we typecast our array above (to avoid the compiler warning) and use NULL CFArray callbacks
-	// (because CGWindowID isn't a CF type) to avoid retain/release.
-	CFArrayRef windowIDsArray = CFArrayCreate(kCFAllocatorDefault, (const void**)windowIDs, [sortedSelection count], NULL);
-	free(windowIDs);
-	
-	// And send our new array on it's merry way
-	return windowIDsArray;
-}
+#pragma mark Window Image Methods
 
 -(void)createSingleWindowShot:(CGWindowID)windowID
 {
@@ -243,22 +136,6 @@ void WindowListApplierFunction(const void *inputDictionary, void *context)
 	CGImageRef windowImage = CGWindowListCreateImage(imageBounds, singleWindowListOptions, windowID, imageOptions);
 	Profile(windowImage);
 	StopwatchEnd("Single Window");
-	[self setOutputImage:windowImage];
-	CGImageRelease(windowImage);
-}
-
--(void)createMultiWindowShot:(NSArray*)selection
-{
-	// Get the correctly sorted list of window IDs. This is a CFArrayRef because we need to put integers in the array
-	// instead of CFTypes or NSObjects.
-	CFArrayRef windowIDs = [self newWindowListFromSelection:selection];
-	
-	// And finally create the window image and set it as our output image.
-	StopwatchStart();
-	CGImageRef windowImage = CGWindowListCreateImageFromArray(imageBounds, windowIDs, imageOptions);
-	Profile(windowImage);
-	StopwatchEnd("Multiple Window");
-	CFRelease(windowIDs);
 	[self setOutputImage:windowImage];
 	CGImageRelease(windowImage);
 }
@@ -327,9 +204,10 @@ void WindowListApplierFunction(const void *inputDictionary, void *context)
 	return option;
 }
 
-NSString *kvoContext = @"SonOfGrabContext";
--(void)awakeFromNib
+-(id)init
 {
+   self = [super init];
+   
 	// Set the initial list options to match the UI.
 	listOptions = kCGWindowListOptionAll;
 	listOptions = ChangeBits(listOptions, kCGWindowListOptionOnScreenOnly, NO);
@@ -349,17 +227,11 @@ NSString *kvoContext = @"SonOfGrabContext";
 	// or passing CGRectNull to get an image that tightly fits the windows specified, but you can pass any rect you like.
 	imageBounds = CGRectNull;
 	
-	// Make sure the source list window is in front
-	[[outputView window] makeKeyAndOrderFront:self];
-	[[self window] makeKeyAndOrderFront:self];
-   
-	// Get the initial window list, and set the initial image, but wait for us to return to the
-	// event loop so that the sample's windows will be included in the list as well.
-	[self performSelectorOnMainThread:@selector(refreshWindowList:) withObject:self waitUntilDone:NO];
-	
 	// Default to creating a screen shot. Do this after our return since the previous request
 	// to refresh the window list will set it to nothing due to the interactions with KVO.
 	[self performSelectorOnMainThread:@selector(createScreenShot) withObject:self waitUntilDone:NO];
+   
+   return self;
 }
 
 -(void)dealloc
@@ -368,12 +240,6 @@ NSString *kvoContext = @"SonOfGrabContext";
 }
 
 #pragma mark Control Actions
-
-- (void)refreshWindowList:(id)sender {
-	// Refreshing the window list combines updating the window list and updating the window image.
-	[self updateWindowList];
-	[self updateImageWithSelection];
-}
 
 - (void)setWindowId:(CGSWindow)newWindowId {
    windowId = newWindowId;

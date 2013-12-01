@@ -59,7 +59,7 @@ typedef enum
 	kSingleWindowBelowOnly = 4,
 } SingleWindowOption;
 
-@interface Controller : NSWindowController
+@interface Controller : NSObject
 {
 	IBOutlet NSImageView *outputView;
 
