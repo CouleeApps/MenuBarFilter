@@ -209,9 +209,6 @@ void WindowListApplierFunction(const void *inputDictionary, void *context)
 	WindowListApplierData data = {prunedWindowList, 0};
 	CFArrayApplyFunction(windowList, CFRangeMake(0, CFArrayGetCount(windowList)), &WindowListApplierFunction, &data);
 	CFRelease(windowList);
-	
-	// Set the new window list
-	[arrayController setContent:prunedWindowList];
 }
 
 -(CFArrayRef)newWindowListFromSelection:(NSArray*)selection
@@ -335,14 +332,14 @@ NSString *kvoContext = @"SonOfGrabContext";
 {
 	// Set the initial list options to match the UI.
 	listOptions = kCGWindowListOptionAll;
-	listOptions = ChangeBits(listOptions, kCGWindowListOptionOnScreenOnly, [listOffscreenWindows intValue] == NSOffState);
-	listOptions = ChangeBits(listOptions, kCGWindowListExcludeDesktopElements, [listDesktopWindows intValue] == NSOffState);
+	listOptions = ChangeBits(listOptions, kCGWindowListOptionOnScreenOnly, NO);
+	listOptions = ChangeBits(listOptions, kCGWindowListExcludeDesktopElements, YES);
    
 	// Set the initial image options to match the UI.
 	imageOptions = kCGWindowImageDefault;
-	imageOptions = ChangeBits(imageOptions, kCGWindowImageBoundsIgnoreFraming, [imageFramingEffects intValue] == NSOnState);
-	imageOptions = ChangeBits(imageOptions, kCGWindowImageShouldBeOpaque, [imageOpaqueImage intValue] == NSOnState);
-	imageOptions = ChangeBits(imageOptions, kCGWindowImageOnlyShadows, [imageShadowsOnly intValue] == NSOnState);
+	imageOptions = ChangeBits(imageOptions, kCGWindowImageBoundsIgnoreFraming, YES);
+	imageOptions = ChangeBits(imageOptions, kCGWindowImageShouldBeOpaque, YES);
+	imageOptions = ChangeBits(imageOptions, kCGWindowImageOnlyShadows, NO);
 	
 	// Set initial single window options to match the UI.
 	singleWindowListOptions = [self singleWindowOption];
@@ -350,10 +347,7 @@ NSString *kvoContext = @"SonOfGrabContext";
 	// CGWindowListCreateImage & CGWindowListCreateImageFromArray will determine their image size dependent on the passed in bounds.
 	// This sample only demonstrates passing either CGRectInfinite to get an image the size of the desktop
 	// or passing CGRectNull to get an image that tightly fits the windows specified, but you can pass any rect you like.
-	imageBounds = ([imageTightFit intValue] == NSOnState) ? CGRectNull : CGRectInfinite;
-	
-	// Register for updates to the selection
-	[arrayController addObserver:self forKeyPath:@"selectionIndexes" options:0 context:&kvoContext];
+	imageBounds = CGRectNull;
 	
 	// Make sure the source list window is in front
 	[[outputView window] makeKeyAndOrderFront:self];
@@ -370,85 +364,12 @@ NSString *kvoContext = @"SonOfGrabContext";
 
 -(void)dealloc
 {
-	// Remove our KVO notification
-	[arrayController removeObserver:self forKeyPath:@"selectionIndexes"];
 	[super dealloc];
-}
-
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	if(context == &kvoContext)
-	{
-      // Find the "Single Window" options control and dynamically enable it based on how many items are selected.
-      [singleWindow setEnabled:[[arrayController selectedObjects] count] <= 1];
-      
-      // Selection has changed, so update the image
-      [self updateImageWithSelection];
-	}
-	else
-	{
-		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-	}
-   
 }
 
 #pragma mark Control Actions
 
--(IBAction)toggleOffscreenWindows:(id)sender
-{
-	listOptions = ChangeBits(listOptions, kCGWindowListOptionOnScreenOnly, [sender intValue] == NSOffState);
-	[self updateWindowList];
-	[self updateImageWithSelection];
-}
-
--(IBAction)toggleDesktopWindows:(id)sender
-{
-	listOptions = ChangeBits(listOptions, kCGWindowListExcludeDesktopElements, [sender intValue] == NSOffState);
-	[self updateWindowList];
-	[self updateImageWithSelection];
-}
-
--(IBAction)toggleFramingEffects:(id)sender
-{
-	imageOptions = ChangeBits(imageOptions, kCGWindowImageBoundsIgnoreFraming, [sender intValue] == NSOnState);
-	[self updateImageWithSelection];
-}
-
--(IBAction)toggleOpaqueImage:(id)sender
-{
-	imageOptions = ChangeBits(imageOptions, kCGWindowImageShouldBeOpaque, [sender intValue] == NSOnState);
-	[self updateImageWithSelection];
-}
-
--(IBAction)toggleShadowsOnly:(id)sender
-{
-	imageOptions = ChangeBits(imageOptions, kCGWindowImageOnlyShadows, [sender intValue] == NSOnState);
-	[self updateImageWithSelection];
-}
-
--(IBAction)toggleTightFit:(id)sender
-{
-	imageBounds = ([sender intValue] == NSOnState) ? CGRectNull : CGRectInfinite;
-	[self updateImageWithSelection];
-}
-
--(IBAction)updateSingleWindowOption:(id)sender
-{
-#pragma unused(sender)
-	singleWindowListOptions = [self singleWindowOption];
-	[self updateImageWithSelection];
-}
-
--(IBAction)grabScreenShot:(id)sender
-{
-#pragma unused(sender)
-	[self createScreenShot];
-}
-
--(IBAction)refreshWindowList:(id)sender
-{
-#pragma unused(sender)
+- (void)refreshWindowList:(id)sender {
 	// Refreshing the window list combines updating the window list and updating the window image.
 	[self updateWindowList];
 	[self updateImageWithSelection];

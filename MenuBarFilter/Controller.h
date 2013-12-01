@@ -62,15 +62,6 @@ typedef enum
 @interface Controller : NSWindowController
 {
 	IBOutlet NSImageView *outputView;
-	IBOutlet NSArrayController *arrayController;
-	
-	IBOutlet NSButton * listOffscreenWindows;
-	IBOutlet NSButton * listDesktopWindows;
-	IBOutlet NSButton * imageFramingEffects;
-	IBOutlet NSButton * imageOpaqueImage;
-	IBOutlet NSButton * imageShadowsOnly;
-	IBOutlet NSButton * imageTightFit;
-	IBOutlet NSMatrix * singleWindow;
 
 	CGWindowListOption listOptions;
 	CGWindowListOption singleWindowListOptions;
@@ -86,24 +77,5 @@ typedef enum
 - (void)setWindowId:(CGSWindow)newWindowId;
 - (void)setSingleWindowOption:(SingleWindowOption)option;
 - (void)setTightFit:(BOOL)fit;
-
-// List Options
--(IBAction)toggleOffscreenWindows:(id)sender;
--(IBAction)toggleDesktopWindows:(id)sender;
-
-// Image Options
--(IBAction)toggleFramingEffects:(id)sender;
--(IBAction)toggleOpaqueImage:(id)sender;
--(IBAction)toggleShadowsOnly:(id)sender;
--(IBAction)toggleTightFit:(id)sender;
-
-// Single Window Options
--(IBAction)updateSingleWindowOption:(id)sender;
-
-// Simple screen shot mode!
--(IBAction)grabScreenShot:(id)sender;
-
-// Refresh window list
--(IBAction)refreshWindowList:(id)sender;
 
 @end
