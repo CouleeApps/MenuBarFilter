@@ -181,6 +181,10 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     frame.origin.y = vframe.size.height + vframe.origin.y + 1;
     frame.size.height -= (vframe.size.height + vframe.origin.y);
 	
+   //GS- This doesn't automatically fix itself, and I hate the one pixel border that shows up
+   if ([self filterWindowsBroken])
+      frame.size.height ++;
+   
 	borderFrame.origin.y = frame.origin.y - 1;
 	borderFrame.size.height = 1;
 
