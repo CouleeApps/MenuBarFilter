@@ -35,7 +35,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		B57F7C67184B137900A75E30 /* CGSPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGSPrivate.h; sourceTree = "<group>"; };
+		B57F7C67184B137900A75E30 /* CGSPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CGSPrivate.h; path = ../CGSPrivate.h; sourceTree = "<group>"; };
 		B57F7C68184B152000A75E30 /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		B57F7C69184B152000A75E30 /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		DA1560221316DB29001F271A /* MenuBarFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,15 +68,54 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DA1560171316DB29001F271A = {
+		B57F7C6B184B155B00A75E30 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				DA15603B1316DB29001F271A /* MainMenu.xib */,
+				DA1560321316DB29001F271A /* MenuBarFilter-Prefix.pch */,
+				B57F7C67184B137900A75E30 /* CGSPrivate.h */,
+				DA1560331316DB29001F271A /* main.m */,
+				DA15602E1316DB29001F271A /* MenuBarFilter-Info.plist */,
+			);
+			name = "Supporting Files";
+			path = MenuBarFilter;
+			sourceTree = "<group>";
+		};
+		B57F7C6C184B157000A75E30 /* Pre-Mavericks Support */ = {
+			isa = PBXGroup;
+			children = (
+				DA1560431316DB82001F271A /* MenuBarFilterWindow.h */,
+				DA1560441316DB82001F271A /* MenuBarFilterWindow.m */,
+			);
+			name = "Pre-Mavericks Support";
+			sourceTree = "<group>";
+		};
+		B57F7C6D184B157800A75E30 /* Post-Mavericks Support */ = {
+			isa = PBXGroup;
+			children = (
+				B57F7C68184B152000A75E30 /* Controller.h */,
+				B57F7C69184B152000A75E30 /* Controller.m */,
+			);
+			name = "Post-Mavericks Support";
+			sourceTree = "<group>";
+		};
+		B57F7C6E184B158600A75E30 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				F2F7764216505257009AEE12 /* dsa_pub.pem */,
-				B57F7C67184B137900A75E30 /* CGSPrivate.h */,
 				F210F82715607720006F2CC9 /* NocturneMenu.png */,
 				F210F82815607720006F2CC9 /* NocturneMenuPressed.png */,
 				DAF6AEF1136D713B00AAA185 /* MenuBarFilter.icns */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		DA1560171316DB29001F271A = {
+			isa = PBXGroup;
+			children = (
 				DA15602C1316DB29001F271A /* MenuBarFilter */,
+				B57F7C6E184B158600A75E30 /* Resources */,
+				B57F7C6B184B155B00A75E30 /* Supporting Files */,
 				DA1560251316DB29001F271A /* Frameworks */,
 				DA1560231316DB29001F271A /* Products */,
 			);
@@ -102,16 +141,10 @@
 		DA15602C1316DB29001F271A /* MenuBarFilter */ = {
 			isa = PBXGroup;
 			children = (
-				B57F7C68184B152000A75E30 /* Controller.h */,
-				B57F7C69184B152000A75E30 /* Controller.m */,
 				DA1560381316DB29001F271A /* MenuBarFilterAppDelegate.h */,
 				DA1560391316DB29001F271A /* MenuBarFilterAppDelegate.m */,
-				DA15603B1316DB29001F271A /* MainMenu.xib */,
-				DA15602E1316DB29001F271A /* MenuBarFilter-Info.plist */,
-				DA1560321316DB29001F271A /* MenuBarFilter-Prefix.pch */,
-				DA1560331316DB29001F271A /* main.m */,
-				DA1560431316DB82001F271A /* MenuBarFilterWindow.h */,
-				DA1560441316DB82001F271A /* MenuBarFilterWindow.m */,
+				B57F7C6C184B157000A75E30 /* Pre-Mavericks Support */,
+				B57F7C6D184B157800A75E30 /* Post-Mavericks Support */,
 			);
 			path = MenuBarFilter;
 			sourceTree = "<group>";
