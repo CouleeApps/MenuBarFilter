@@ -23,8 +23,8 @@
 @interface MenuBarFilterWindow : NSWindow {
 
 @private
-	CGSWindow wid;
-	CGSWindowFilterRef fid;
+	CGSWindow window;
+	CGSWindowFilterRef filter;
 }
 
 - (void) setFilter:(NSString *)filterName;

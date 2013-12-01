@@ -22,12 +22,12 @@
 
 #import "MenuBarFilterWindow.h"
 
-CGSConnection cid;
+CGSConnection connection;
 
 @implementation MenuBarFilterWindow
 
 + (void)initialize {
-    cid = _CGSDefaultConnection();
+    connection = _CGSDefaultConnection();
 }
 
 - (id) init {
@@ -48,29 +48,29 @@ CGSConnection cid;
             NSWindowCollectionBehaviorCanJoinAllSpaces |
             NSWindowCollectionBehaviorStationary];
 
-        wid = (CGSWindow)[self windowNumber];
+        window = (CGSWindow)[self windowNumber];
     }
     return self;
 }
 
 - (void)setFilter:(NSString *)filterName{
-    if ( fid ){
-        CGSRemoveWindowFilter( cid, wid, fid );
-        CGSReleaseCIFilter( cid, fid );
+    if ( filter ){
+        CGSRemoveWindowFilter( connection, window, filter );
+        CGSReleaseCIFilter( connection, filter );
     }
     if ( filterName ) {
-        CGError error = CGSNewCIFilterByName( cid, (CFStringRef)filterName, &fid );
+        CGError error = CGSNewCIFilterByName( connection, (CFStringRef)filterName, &filter );
         if ( error == noErr ) {
-            CGSAddWindowFilter( cid, wid, fid, 0x00003001 );
+            CGSAddWindowFilter( connection, window, filter, 0x00003001 );
         }
     }
 }
 
 -(void)setFilterValues:(NSDictionary *)filterValues{
-    if ( !fid ) {
+    if ( !filter ) {
         return;
     }
-    CGSSetCIFilterValuesFromDictionary( cid, fid, (CFDictionaryRef)filterValues );
+    CGSSetCIFilterValuesFromDictionary( connection, filter, (CFDictionaryRef)filterValues );
 }
 
 @end
