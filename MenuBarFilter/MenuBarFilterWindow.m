@@ -22,18 +22,6 @@
 
 #import "MenuBarFilterWindow.h"
 
-typedef long CGSConnection;
-typedef long CGSWindow;
-
-
-extern CGSConnection _CGSDefaultConnection( void );
-extern void CGSRemoveWindowFilter( CGSConnection cid, CGSWindow wid, void * fid );
-extern void CGSReleaseCIFilter( CGSConnection cid, void * fid );
-extern OSStatus CGSNewCIFilterByName( CGSConnection cid, CFStringRef filterName, void * fid );
-extern OSStatus CGSAddWindowFilter( CGSConnection cid, CGSWindow wid, void * fid, int value );
-extern void CGSSetCIFilterValuesFromDictionary( CGSConnection cid, void * fid, CFDictionaryRef filterValues );
-
-
 CGSConnection cid;
 
 @implementation MenuBarFilterWindow
@@ -60,7 +48,7 @@ CGSConnection cid;
             NSWindowCollectionBehaviorCanJoinAllSpaces |
             NSWindowCollectionBehaviorStationary];
 
-        wid = [self windowNumber];
+        wid = (CGSWindow)[self windowNumber];
     }
     return self;
 }

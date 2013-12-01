@@ -34,6 +34,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B57F7C67184B137900A75E30 /* CGSPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGSPrivate.h; sourceTree = "<group>"; };
 		DA1560221316DB29001F271A /* MenuBarFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA1560261316DB29001F271A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DA15602E1316DB29001F271A /* MenuBarFilter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MenuBarFilter-Info.plist"; sourceTree = "<group>"; };
@@ -68,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				F2F7764216505257009AEE12 /* dsa_pub.pem */,
+				B57F7C67184B137900A75E30 /* CGSPrivate.h */,
 				F210F82715607720006F2CC9 /* NocturneMenu.png */,
 				F210F82815607720006F2CC9 /* NocturneMenuPressed.png */,
 				DAF6AEF1136D713B00AAA185 /* MenuBarFilter.icns */,

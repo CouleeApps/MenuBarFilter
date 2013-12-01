@@ -26,13 +26,6 @@
 NSString *window_server = @"Window Server";
 NSString *backstop_menubar = @"Backstop Menubar";
 
-// Undocumented spaces related APIs
-typedef long CGSConnection;
-extern CGSConnection _CGSDefaultConnection(void);
-typedef void (*CGConnectionNotifyProc)(int data1, int data2, int data3, void* userParameter);
-extern CGError CGSRegisterConnectionNotifyProc(const CGSConnection cid,
-            CGConnectionNotifyProc function, int event, void* userParameter);
-
 /* observed that this is sent when Mission Control is activated */
 #define CGSConnectionNotifyEventMissionControl 1204
 

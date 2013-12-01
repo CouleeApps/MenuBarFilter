@@ -18,11 +18,13 @@
  limitations under the License.
  */
 
+#import "CGSPrivate.h"
+
 @interface MenuBarFilterWindow : NSWindow {
 
 @private
-	long wid;
-	void * fid;
+	CGSWindow wid;
+	CGSWindowFilterRef fid;
 }
 
 - (void) setFilter:(NSString *)filterName;
