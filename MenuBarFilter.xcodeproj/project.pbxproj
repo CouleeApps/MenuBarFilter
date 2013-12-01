@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B57F7C6A184B152000A75E30 /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = B57F7C69184B152000A75E30 /* Controller.m */; };
 		DA1560271316DB29001F271A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA1560261316DB29001F271A /* Cocoa.framework */; };
 		DA1560341316DB29001F271A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1560331316DB29001F271A /* main.m */; };
 		DA15603A1316DB29001F271A /* MenuBarFilterAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1560391316DB29001F271A /* MenuBarFilterAppDelegate.m */; };
@@ -35,6 +36,8 @@
 
 /* Begin PBXFileReference section */
 		B57F7C67184B137900A75E30 /* CGSPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGSPrivate.h; sourceTree = "<group>"; };
+		B57F7C68184B152000A75E30 /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
+		B57F7C69184B152000A75E30 /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		DA1560221316DB29001F271A /* MenuBarFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA1560261316DB29001F271A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		DA15602E1316DB29001F271A /* MenuBarFilter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MenuBarFilter-Info.plist"; sourceTree = "<group>"; };
@@ -99,6 +102,8 @@
 		DA15602C1316DB29001F271A /* MenuBarFilter */ = {
 			isa = PBXGroup;
 			children = (
+				B57F7C68184B152000A75E30 /* Controller.h */,
+				B57F7C69184B152000A75E30 /* Controller.m */,
 				DA1560381316DB29001F271A /* MenuBarFilterAppDelegate.h */,
 				DA1560391316DB29001F271A /* MenuBarFilterAppDelegate.m */,
 				DA15603B1316DB29001F271A /* MainMenu.xib */,
@@ -181,6 +186,7 @@
 				DA1560341316DB29001F271A /* main.m in Sources */,
 				DA15603A1316DB29001F271A /* MenuBarFilterAppDelegate.m in Sources */,
 				DA1560451316DB82001F271A /* MenuBarFilterWindow.m in Sources */,
+				B57F7C6A184B152000A75E30 /* Controller.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
