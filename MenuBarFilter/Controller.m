@@ -55,7 +55,7 @@
 #pragma mark Basic Profiling Tools
 // Set to 1 to enable basic profiling. Profiling information is logged to console.
 #ifndef PROFILE_WINDOW_GRAB
-#define PROFILE_WINDOW_GRAB 0
+#define PROFILE_WINDOW_GRAB 1
 #endif
 
 #if PROFILE_WINDOW_GRAB
@@ -72,22 +72,16 @@
 
 // Simple helper to twiddle bits in a uint32_t.
 inline uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags);
-uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
-{
-	if(setFlags)
-	{	// Set Bits
+uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags) {
+	if(setFlags) {	// Set Bits
 		return currentBits | flagsToChange;
-	}
-	else
-	{	// Clear Bits
+	} else {	// Clear Bits
 		return currentBits & ~flagsToChange;
 	}
 }
 
--(void)setOutputImage:(CGImageRef)cgImage
-{
-	if(cgImage != NULL)
-	{
+- (void)setOutputImage:(CGImageRef)cgImage {
+	if (cgImage != NULL) {
 		// Create a bitmap rep from the image...
       CIImage *image = [CIImage imageWithCGImage:cgImage];
       
@@ -103,7 +97,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
       [colorFilter setValue:inverted forKey:@"inputImage"];
       
       CIImage *colored = [colorFilter valueForKey:@"outputImage"];
-
+      
       CIFilter *gammaFilter = [CIFilter filterWithName:@"CIGammaAdjust"];
       [gammaFilter setValue:@3 forKey:@"inputPower"];
       
@@ -112,16 +106,14 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
       CIImage *output = [gammaFilter valueForKey:@"outputImage"];
       
       NSCIImageRep *rep = [NSCIImageRep imageRepWithCIImage:output];
-
+      
 		// Create an NSImage and add the bitmap rep to it...
 		NSImage *final = [[NSImage alloc] initWithSize:[rep size]];
 		[final addRepresentation:rep];
 		// Set the output view to the new NSImage.
 		[outputView setImage:final];
 		[image release];
-	}
-	else
-	{
+	} else {
       NSLog(@"Image is null");
 		[outputView setImage:nil];
 	}
@@ -129,8 +121,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 
 #pragma mark Window Image Methods
 
--(void)createSingleWindowShot:(CGWindowID)windowID
-{
+- (void)createSingleWindowShot:(CGWindowID)windowID {
 	// Create an image from the passed in windowID with the single window option selected by the user.
 	StopwatchStart();
 	CGImageRef windowImage = CGWindowListCreateImage(imageBounds, singleWindowListOptions, windowID, imageOptions);
@@ -140,8 +131,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	CGImageRelease(windowImage);
 }
 
--(void)createScreenShot
-{
+- (void)createScreenShot {
 	// This just invokes the API as you would if you wanted to grab a screen shot. The equivalent using the UI would be to
 	// enable all windows, turn off "Fit Image Tightly", and then select all windows in the list.
 	StopwatchStart();
@@ -154,18 +144,14 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 
 #pragma mark GUI Support
 
--(void)updateImageWithSelection
-{
+- (void)updateImageWithSelection {
 	// Depending on how much is selected either clear the output image or
 	// set the image based on a single selected window
-
+   
    //GS- Removed most of this so it can take a window ID passed in via -setWindowId:
-	if(windowId == 0)
-	{
+	if (windowId == 0) {
 		[self setOutputImage:NULL];
-	}
-	else
-	{
+	} else {
 		// Single window selected, so use the single window options.
 		[self createSingleWindowShot:windowId];
 	}
@@ -173,11 +159,9 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 
 // Simple helper that converts the selected row number of the singleWindow NSMatrix
 // to the appropriate CGWindowListOption.
--(CGWindowListOption)singleWindowOption
-{
+- (CGWindowListOption)singleWindowOption {
 	CGWindowListOption option = 0;
-	switch (windowOption)
-	{
+	switch (windowOption) {
 		case kSingleWindowAboveOnly:
 			option = kCGWindowListOptionOnScreenAboveWindow;
 			break;
@@ -204,8 +188,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	return option;
 }
 
--(id)init
-{
+- (id)init {
    self = [super init];
    
 	// Set the initial list options to match the UI.
@@ -234,8 +217,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
    return self;
 }
 
--(void)dealloc
-{
+- (void)dealloc {
 	[super dealloc];
 }
 
