@@ -31,7 +31,7 @@ NSString *backstop_menubar = @"Backstop Menubar";
 
 static void spaces_callback(int data1, int data2, int data3, void *ptr)
 {
-    MenuBarFilterAppDelegate *self = ptr;
+    MenuBarFilterAppDelegate *self = (__bridge MenuBarFilterAppDelegate *)(ptr);
 
     switch (data1) {
         case CGSConnectionNotifyEventMissionControl: // Mission Control
@@ -47,14 +47,12 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 - (void) enableMenuItem:(BOOL)enable {
     if (statusItem && !enable) {
         [[statusItem statusBar] removeStatusItem:statusItem];
-        [statusItem release];
     } else if (enable && !statusItem) {
         statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:22];
         [statusItem setMenu:statusMenu];
         [statusItem setHighlightMode:YES];
         [statusItem setImage:[NSImage imageNamed:@"NocturneMenu"]];
         [statusItem setAlternateImage:[NSImage imageNamed:@"NocturneMenuPressed"]];
-        [statusItem retain];
     }
 }
 
@@ -160,7 +158,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
     // Use undocumented APIs to detect mission control being launched :-/
     // I observed this event code on 10.8. No idea if this is valid for other versions of OSX, YMMV.
-    CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, CGSConnectionNotifyEventMissionControl, self);
+    CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, CGSConnectionNotifyEventMissionControl, (__bridge void *)(self));
 
 #if 0
     // I used this to spy on the spaces events
@@ -304,9 +302,9 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
         CFDictionaryRef windict = CFArrayGetValueAtIndex(windows, i);
         CFStringRef name = CFDictionaryGetValue(windict, kCGWindowOwnerName);
 
-        if ([window_server compare:(NSString*)name] == 0) {
+        if ([window_server compare:(__bridge NSString*)name] == 0) {
             name = CFDictionaryGetValue(windict, kCGWindowName);
-            if ([backstop_menubar compare:(NSString*)name] == 0) {
+            if ([backstop_menubar compare:(__bridge NSString*)name] == 0) {
                 show = true;
             }
 

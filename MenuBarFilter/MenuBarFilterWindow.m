@@ -59,7 +59,7 @@ CGSConnection connection;
         CGSReleaseCIFilter( connection, filter );
     }
     if ( filterName ) {
-        CGError error = CGSNewCIFilterByName( connection, (CFStringRef)filterName, &filter );
+        CGError error = CGSNewCIFilterByName( connection, (__bridge CFStringRef)filterName, &filter );
         if ( error == noErr ) {
             CGSAddWindowFilter( connection, window, filter, 0x00003001 );
         }
@@ -70,7 +70,7 @@ CGSConnection connection;
     if ( !filter ) {
         return;
     }
-    CGSSetCIFilterValuesFromDictionary( connection, filter, (CFDictionaryRef)filterValues );
+    CGSSetCIFilterValuesFromDictionary( connection, filter, (__bridge CFDictionaryRef)filterValues );
 }
 
 @end

@@ -112,7 +112,6 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 		[final addRepresentation:rep];
 		// Set the output view to the new NSImage.
 		[outputView setImage:final];
-		[image release];
 	} else {
       NSLog(@"Image is null");
 		[outputView setImage:nil];
@@ -217,9 +216,6 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
    return self;
 }
 
-- (void)dealloc {
-	[super dealloc];
-}
 
 #pragma mark Control Actions
 
