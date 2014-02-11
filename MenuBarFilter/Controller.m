@@ -2,14 +2,14 @@
  File: Controller.m
  Abstract: Handles UI interaction and retrieves window images.
  Version: 1.1
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,9 +40,9 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2010 Apple Inc. All Rights Reserved.
- 
+
  */
 
 #import "Controller.h"
@@ -55,7 +55,7 @@
 #pragma mark Basic Profiling Tools
 // Set to 1 to enable basic profiling. Profiling information is logged to console.
 #ifndef PROFILE_WINDOW_GRAB
-#define PROFILE_WINDOW_GRAB 1
+#define PROFILE_WINDOW_GRAB 0
 #endif
 
 #if PROFILE_WINDOW_GRAB
@@ -81,41 +81,14 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 }
 
 - (void)setOutputImage:(CGImageRef)cgImage {
-   StopwatchStart();
+    StopwatchStart();
 	if (cgImage != NULL) {
 		// Create a bitmap rep from the image...
-      CIImage *image = [CIImage imageWithCGImage:cgImage];
-      
-      //Load the filter
-      CIFilter *invertFilter = [CIFilter filterWithName:@"CIColorInvert"];
-      
-      [invertFilter setValue:image forKey:@"inputImage"];
-      CIImage *inverted = [invertFilter valueForKey:@"outputImage"];
-      
-      CIFilter *colorFilter = [CIFilter filterWithName:@"CIHueAdjust"];
-      [colorFilter setValue:@M_PI forKey:@"inputAngle"];
-      
-      [colorFilter setValue:inverted forKey:@"inputImage"];
-      
-      CIImage *colored = [colorFilter valueForKey:@"outputImage"];
-      
-      CIFilter *gammaFilter = [CIFilter filterWithName:@"CIGammaAdjust"];
-      [gammaFilter setValue:@3 forKey:@"inputPower"];
-      
-      [gammaFilter setValue:colored forKey:@"inputImage"];
-      
-      CIImage *output = [gammaFilter valueForKey:@"outputImage"];
-      
-      NSCIImageRep *rep = [NSCIImageRep imageRepWithCIImage:output];
-      
-		// Create an NSImage and add the bitmap rep to it...
-		NSImage *final = [[NSImage alloc] initWithSize:[rep size]];
-		[final addRepresentation:rep];
 		// Set the output view to the new NSImage.
-		[outputView setImage:final];
+		[outputView performSelectorOnMainThread:@selector(setImage:) withObject:(__bridge id)cgImage waitUntilDone:NO];
 	} else {
-      NSLog(@"Image is null");
-		[outputView setImage:nil];
+        NSLog(@"Image is null");
+		[outputView performSelectorOnMainThread:@selector(setImage:) withObject:nil waitUntilDone:NO];
 	}
 	StopwatchEnd("Outputting Image");
 }
@@ -148,8 +121,8 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 - (void)updateImageWithSelection {
 	// Depending on how much is selected either clear the output image or
 	// set the image based on a single selected window
-   
-   //GS- Removed most of this so it can take a window ID passed in via -setWindowId:
+
+    //GS- Removed most of this so it can take a window ID passed in via -setWindowId:
 	if (windowId == 0) {
 		[self setOutputImage:NULL];
 	} else {
@@ -166,23 +139,23 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 		case kSingleWindowAboveOnly:
 			option = kCGWindowListOptionOnScreenAboveWindow;
 			break;
-			
+
 		case kSingleWindowAboveIncluded:
 			option = kCGWindowListOptionOnScreenAboveWindow | kCGWindowListOptionIncludingWindow;
 			break;
-			
+
 		case kSingleWindowOnly:
 			option = kCGWindowListOptionIncludingWindow;
 			break;
-			
+
 		case kSingleWindowBelowIncluded:
 			option = kCGWindowListOptionOnScreenBelowWindow | kCGWindowListOptionIncludingWindow;
 			break;
-         
+
 		case kSingleWindowBelowOnly:
 			option = kCGWindowListOptionOnScreenBelowWindow;
 			break;
-			
+
 		default:
 			break;
 	}
@@ -190,50 +163,50 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 }
 
 - (id)init {
-   self = [super init];
-   
+    self = [super init];
+
 	// Set the initial list options to match the UI.
 	listOptions = kCGWindowListOptionAll;
 	listOptions = ChangeBits(listOptions, kCGWindowListOptionOnScreenOnly, NO);
 	listOptions = ChangeBits(listOptions, kCGWindowListExcludeDesktopElements, YES);
-   
+
 	// Set the initial image options to match the UI.
 	imageOptions = kCGWindowImageDefault;
 	imageOptions = ChangeBits(imageOptions, kCGWindowImageBoundsIgnoreFraming, YES);
 	imageOptions = ChangeBits(imageOptions, kCGWindowImageShouldBeOpaque, YES);
 	imageOptions = ChangeBits(imageOptions, kCGWindowImageOnlyShadows, NO);
-	
+
 	// Set initial single window options to match the UI.
 	singleWindowListOptions = [self singleWindowOption];
-	
+
 	// CGWindowListCreateImage & CGWindowListCreateImageFromArray will determine their image size dependent on the passed in bounds.
 	// This sample only demonstrates passing either CGRectInfinite to get an image the size of the desktop
 	// or passing CGRectNull to get an image that tightly fits the windows specified, but you can pass any rect you like.
 	imageBounds = CGRectNull;
-	
+
 	// Default to creating a screen shot. Do this after our return since the previous request
 	// to refresh the window list will set it to nothing due to the interactions with KVO.
 	[self performSelectorOnMainThread:@selector(createScreenShot) withObject:self waitUntilDone:NO];
-   
-   return self;
+
+    return self;
 }
 
 
 #pragma mark Control Actions
 
 - (void)update {
-   [self updateImageWithSelection];
+    [self updateImageWithSelection];
 }
 
 - (void)setWindowId:(CGSWindow)newWindowId {
-   windowId = newWindowId;
+    windowId = newWindowId;
 	singleWindowListOptions = [self singleWindowOption];
-   [self updateImageWithSelection];
+    [self updateImageWithSelection];
 }
 
 - (void)setSingleWindowOption:(SingleWindowOption)option {
-   windowOption = option;
-   singleWindowListOptions = [self singleWindowOption];
+    windowOption = option;
+    singleWindowListOptions = [self singleWindowOption];
 	[self updateImageWithSelection];
 }
 

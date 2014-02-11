@@ -121,7 +121,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
       screenshotWindow.controller = controller;
       
       //GS- Have the controller output to the menu bar
-      controller.outputView = screenshotWindow.imageView;
+      controller.outputView = screenshotWindow.view;
    }
 
     // add observer for screen changes
@@ -163,7 +163,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 #if 0
     // I used this to spy on the spaces events
     for (int i = 0; i < 2048; i++) {
-        CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, i, self);
+        CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, i, (__bridge void *)(self));
     }
 #endif
 
