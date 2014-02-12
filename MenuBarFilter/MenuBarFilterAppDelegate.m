@@ -57,72 +57,72 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 }
 
 - (BOOL)filterWindowsBroken {
-   NSString *osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
-   //Version 10.9 (Build 13A603)
-   
-   int osMajor = [[[osVersion componentsSeparatedByString:@" "][1] componentsSeparatedByString:@"."][0] intValue];
-   int osMinor = [[[osVersion componentsSeparatedByString:@" "][1] componentsSeparatedByString:@"."][1] intValue];
-   
-   //GS- I assume future versions will also have this broken
-   return (osMajor == 10 && osMinor >= 9) || osMajor > 10 /* Future compatibility */;
+    NSString *osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
+    //Version 10.9 (Build 13A603)
+
+    int osMajor = [[[osVersion componentsSeparatedByString:@" "][1] componentsSeparatedByString:@"."][0] intValue];
+    int osMinor = [[[osVersion componentsSeparatedByString:@" "][1] componentsSeparatedByString:@"."][1] intValue];
+
+    //GS- I assume future versions will also have this broken
+    return (osMajor == 10 && osMinor >= 9) || osMajor > 10 /* Future compatibility */;
 }
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
-   //GS- All of this is broken in Mavericks.
-   if (![self filterWindowsBroken]) {
-      NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
-      NSDictionary *appDefaults = [NSMutableDictionary dictionary];
-      
-      // defaults write org.wezfurlong.MenuBarFilter enableMenu NO
-      [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"enableMenu"];
-      
-      // defaults write org.wezfurlong.MenuBarFilter useHue NO
-      [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
-      
-      [defs registerDefaults:appDefaults];
-      [self enableMenuItem:[defs boolForKey:@"enableMenu"]];
-      
-      // create invert overlay
-      invertWindow = [[MenuBarFilterWindow alloc] init];
-      [invertWindow setFilter:@"CIColorInvert"];
-      
-      // create border overlay
-      borderWindow = [[MenuBarFilterWindow alloc] init];
-      [borderWindow setBackgroundColor: NSColor.blackColor];
-      
-      hueWindow = [[MenuBarFilterWindow alloc] init];
-      if ([defs boolForKey:@"useHue"]) {
-         // create hue overlay
-         [hueWindow setFilter:@"CIHueAdjust"];
-         [hueWindow setFilterValues:
-          [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:M_PI],
-           @"inputAngle", nil]];
-      } else {
-         // de-saturation filter
-         [hueWindow setFilter:@"CIColorControls"];
-         [hueWindow setFilterValues:
-          [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
-                                      forKey: @"inputSaturation" ] ];
-         [hueWindow setFilterValues:
-          [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
-                                      forKey: @"inputBrightness" ] ];
-         [hueWindow setFilterValues:
-          [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
-                                      forKey: @"inputContrast" ] ];
-      }
-   } else {
-      screenshotWindow = [[MenuBarScreenshotWindow alloc] init];
-      
-      //GS- Default values
-      [controller setWindowId:(CGSWindow)screenshotWindow.windowNumber];
-      [controller setSingleWindowOption:kSingleWindowBelowOnly];
-      [controller setTightFit:NO];
-      
-      screenshotWindow.controller = controller;
-      
-      //GS- Have the controller output to the menu bar
-      controller.outputView = screenshotWindow.view;
-   }
+    //GS- All of this is broken in Mavericks.
+    if (![self filterWindowsBroken]) {
+        NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
+        NSDictionary *appDefaults = [NSMutableDictionary dictionary];
+
+        // defaults write org.wezfurlong.MenuBarFilter enableMenu NO
+        [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"enableMenu"];
+
+        // defaults write org.wezfurlong.MenuBarFilter useHue NO
+        [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
+
+        [defs registerDefaults:appDefaults];
+        [self enableMenuItem:[defs boolForKey:@"enableMenu"]];
+
+        // create invert overlay
+        invertWindow = [[MenuBarFilterWindow alloc] init];
+        [invertWindow setFilter:@"CIColorInvert"];
+
+        // create border overlay
+        borderWindow = [[MenuBarFilterWindow alloc] init];
+        [borderWindow setBackgroundColor: NSColor.blackColor];
+
+        hueWindow = [[MenuBarFilterWindow alloc] init];
+        if ([defs boolForKey:@"useHue"]) {
+            // create hue overlay
+            [hueWindow setFilter:@"CIHueAdjust"];
+            [hueWindow setFilterValues:
+             [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:M_PI],
+              @"inputAngle", nil]];
+        } else {
+            // de-saturation filter
+            [hueWindow setFilter:@"CIColorControls"];
+            [hueWindow setFilterValues:
+             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
+                                         forKey: @"inputSaturation" ] ];
+            [hueWindow setFilterValues:
+             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
+                                         forKey: @"inputBrightness" ] ];
+            [hueWindow setFilterValues:
+             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
+                                         forKey: @"inputContrast" ] ];
+        }
+    } else {
+        screenshotWindow = [[MenuBarScreenshotWindow alloc] init];
+
+        //GS- Default values
+        [controller setWindowId:(CGSWindow)screenshotWindow.windowNumber];
+        [controller setSingleWindowOption:kSingleWindowBelowOnly];
+        [controller setTightFit:NO];
+
+        screenshotWindow.controller = controller;
+
+        //GS- Have the controller output to the menu bar
+        controller.outputView = screenshotWindow.view;
+    }
 
     // add observer for screen changes
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -177,6 +177,9 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 }
 
 - (void) reposition {
+    if (inMissionControl)
+        return;
+
     NSRect frame = [[NSScreen mainScreen] frame];
     NSRect vframe = [[NSScreen mainScreen] visibleFrame];
 	NSRect borderFrame = [[NSScreen mainScreen] visibleFrame];
@@ -185,23 +188,23 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
     frame.origin.y = vframe.size.height + vframe.origin.y + 1;
     frame.size.height -= (vframe.size.height + vframe.origin.y);
-	
-   //GS- This doesn't automatically fix itself, and I hate the one pixel border that shows up
-   if ([self filterWindowsBroken])
-      frame.size.height --;
-   
+
+    //GS- This doesn't automatically fix itself, and I hate the one pixel border that shows up
+    if ([self filterWindowsBroken])
+        frame.size.height -= (1.0 / [[NSScreen mainScreen] backingScaleFactor]);
+
 	borderFrame.origin.y = frame.origin.y - 1;
 	borderFrame.size.height = 1;
 
     NSLog(@"Using %f %f", frame.origin.y, frame.size.height);
-	
-   if ([self filterWindowsBroken]) {
-      [screenshotWindow setFrame:frame display:NO];
-   } else {
-      [hueWindow setFrame:frame display:NO];
-      [invertWindow setFrame:frame display:NO];
-      [borderWindow setFrame:borderFrame display:NO];
-   }
+
+    if ([self filterWindowsBroken]) {
+        [screenshotWindow setFrame:frame display:NO];
+    } else {
+        [hueWindow setFrame:frame display:NO];
+        [invertWindow setFrame:frame display:NO];
+        [borderWindow setFrame:borderFrame display:NO];
+    }
 }
 
 - (void) observeValueForKeyPath:(NSString *)keyPath
@@ -233,7 +236,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 // to an NSEvent based monitor instead.
 - (void) missionControlTapped {
     if (inMissionControl) {
-    //    NSLog(@"tapped and in mission control; show again");
+        //    NSLog(@"tapped and in mission control; show again");
         inMissionControl = NO;
         if (eventMonitor) {
             [NSEvent removeMonitor:eventMonitor];
@@ -248,35 +251,35 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     inMissionControl = TRUE;
     eventMonitor = [NSEvent
                     addGlobalMonitorForEventsMatchingMask:
-                        NSMouseMovedMask|NSKeyDownMask|NSLeftMouseDownMask|NSLeftMouseUpMask|
-                        NSFlagsChangedMask|NSTabletPointMask
+                    NSMouseMovedMask|NSKeyDownMask|NSLeftMouseDownMask|NSLeftMouseUpMask|
+                    NSFlagsChangedMask|NSTabletPointMask
                     handler:^void (NSEvent *evt) {
-        [self missionControlTapped];
-    }];
+                        [self missionControlTapped];
+                    }];
 }
 
 - (void) showFilter {
     if (!visible) {
-       if ([self filterWindowsBroken]) {
-          [screenshotWindow orderFrontRegardless];
-       } else {
-          [invertWindow orderFrontRegardless];
-          [hueWindow orderFrontRegardless];
-          [borderWindow orderFrontRegardless];
-       }
+        if ([self filterWindowsBroken]) {
+            [screenshotWindow orderFrontRegardless];
+        } else {
+            [invertWindow orderFrontRegardless];
+            [hueWindow orderFrontRegardless];
+            [borderWindow orderFrontRegardless];
+        }
         visible = YES;
     }
 }
 
 - (void) hideFilter {
     if (visible) {
-       if ([self filterWindowsBroken]) {
-          [screenshotWindow orderOut:nil];
-       } else {
-          [hueWindow orderOut:nil];
-          [invertWindow orderOut:nil];
-          [borderWindow orderOut:nil];
-       }
+        if ([self filterWindowsBroken]) {
+            [screenshotWindow orderOut:nil];
+        } else {
+            [hueWindow orderOut:nil];
+            [invertWindow orderOut:nil];
+            [borderWindow orderOut:nil];
+        }
         visible = NO;
     }
 }
@@ -290,6 +293,9 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 }
 
 - (void) checkForFullScreen:(NSNotification*)notification {
+    if (inMissionControl)
+        return;
+    
     // Look at the windows on this screen; if we can't find the menubar backstop,
     // we know we're in fullscreen mode
 
@@ -317,7 +323,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     if ( show && !visible ) {
         [self showFilter];
         //    NSLog(@"checkForFullScreen -> making visible");
-
+        
     }
     else if ( !show && visible ) {
         [self hideFilter];
