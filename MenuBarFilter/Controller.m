@@ -70,6 +70,13 @@
 
 #pragma mark Utilities
 
+NSString *kAppNameKey = @"applicationName";	// Application Name & PID
+NSString *kWindowOriginKey = @"windowOrigin";	// Window Origin as a string
+NSString *kWindowSizeKey = @"windowSize";		// Window Size as a string
+NSString *kWindowIDKey = @"windowID";			// Window ID
+NSString *kWindowLevelKey = @"windowLevel";	// Window Level
+NSString *kWindowOrderKey = @"windowOrder";	// The overall front-to-back ordering of the
+
 // Simple helper to twiddle bits in a uint32_t.
 inline uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags);
 uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags) {
@@ -93,6 +100,15 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	StopwatchEnd("Outputting Image");
 }
 
+- (NSPoint)screenOffset {
+    if (notificationCenter) {
+        NSArray *info = (__bridge NSArray *)CGWindowListCopyWindowInfo(kCGWindowListOptionIncludingWindow, notificationCenter);
+        NSDictionary *bounds = [[info objectAtIndex:0] objectForKey:(__bridge NSString *)kCGWindowBounds];
+        return NSMakePoint([[bounds objectForKey:@"X"] intValue] - [[NSScreen mainScreen] frame].size.width, 0);
+    }
+    return NSMakePoint(0, 0);
+}
+
 #pragma mark Window Image Methods
 
 - (void)createSingleWindowShot:(CGWindowID)windowID {
@@ -109,7 +125,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	// This just invokes the API as you would if you wanted to grab a screen shot. The equivalent using the UI would be to
 	// enable all windows, turn off "Fit Image Tightly", and then select all windows in the list.
 	StopwatchStart();
-	CGImageRef screenShot = CGWindowListCreateImage(CGRectInfinite, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+	CGImageRef screenShot = CGWindowListCreateImage(CGRectInfinite, kCGWindowListOptionOnScreenAboveWindow | kCGWindowListOptionIncludingWindow, kCGNullWindowID, kCGWindowImageDefault);
 	Profile(screenShot);
 	StopwatchEnd("Screenshot");
 	[self setOutputImage:screenShot];
@@ -187,6 +203,23 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	// Default to creating a screen shot. Do this after our return since the previous request
 	// to refresh the window list will set it to nothing due to the interactions with KVO.
 	[self performSelectorOnMainThread:@selector(createScreenShot) withObject:self waitUntilDone:NO];
+
+    notificationCenter = 0;
+    NSArray *windowList = (__bridge NSArray *)CGWindowListCopyWindowInfo(listOptions, kCGNullWindowID);
+    for (NSDictionary *window in windowList) {
+        //Notification center level 25 size 0x0
+
+        if ([[window objectForKey:(__bridge NSString *)kCGWindowOwnerName] isEqualToString:@"Notification Center"] &&
+            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Width"]  intValue] == 0 &&
+            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Height"] intValue] == 0 &&
+            [[window objectForKey:(__bridge NSString *)kCGWindowLayer] intValue] == 25 &&
+            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"X"] intValue] == [[NSScreen mainScreen] frame].size.width &&
+            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Y"] intValue] == 0) {
+            //It's our notif center
+
+            notificationCenter = [[window objectForKey:(__bridge NSString *)kCGWindowNumber] intValue];
+        }
+    }
 
     return self;
 }

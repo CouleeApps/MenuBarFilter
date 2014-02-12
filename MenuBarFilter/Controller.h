@@ -68,12 +68,14 @@ typedef enum
 	CGWindowImageOption imageOptions;
 	CGRect imageBounds;
 
+    CGSWindow notificationCenter;
     CGSWindow windowId;
     SingleWindowOption windowOption;
 }
 
 @property (nonatomic, strong) NSView *outputView;
 
+- (NSPoint)screenOffset;
 - (void)update;
 - (void)setWindowId:(CGSWindow)newWindowId;
 - (void)setSingleWindowOption:(SingleWindowOption)option;

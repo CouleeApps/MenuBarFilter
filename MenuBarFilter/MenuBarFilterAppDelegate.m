@@ -119,6 +119,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
         [controller setTightFit:NO];
 
         screenshotWindow.controller = controller;
+        screenshotWindow.view.controller = controller;
 
         //GS- Have the controller output to the menu bar
         controller.outputView = screenshotWindow.view;

@@ -125,6 +125,8 @@
     CGContextRef ref = [NSGraphicsContext currentContext].graphicsPort;
     if (self.image) {
         CGImageRef image = [self invertedImage];
+        CGPoint offset = [self.controller screenOffset];
+        dirtyRect = CGRectApplyAffineTransform(dirtyRect, CGAffineTransformMakeTranslation(-offset.x, offset.y));
         CGContextDrawImage(ref, dirtyRect, image);
         CFRelease(image);
     }

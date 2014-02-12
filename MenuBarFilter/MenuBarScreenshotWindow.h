@@ -41,5 +41,6 @@
 @end
 
 @interface MenuBarScreenshotView : NSView
+@property (nonatomic) Controller *controller;
 @property (nonatomic) CGImageRef image;
 @end
