@@ -17,6 +17,11 @@ By default it uses a hue filter to change the color, but there is a
 hidden preference that can be used to change this to a saturation filter
 in case you don't like how the colors are manipulated by the hue filter.
 
+In Mac OS X 10.9 Mavericks, Apple took out the private API for filter windows,
+but a workaround has been made. For computers running Mavericks, the
+application takes a screenshot of your menubar many times every second
+and uses the information from that to overlay an inverted menubar window.
+
 ## Preferences
 
 There is no preference GUI (pull requests to add this are welcome!) but
@@ -55,5 +60,5 @@ This software is distributed under the terms of the
 * Copyright 2005 Blacktree
 * Copyright 2011 eece
 * Copyright 2012 Wez Furlong
-
+* Copyright 2014 Glenn Smith
 
