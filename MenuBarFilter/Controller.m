@@ -101,34 +101,34 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 }
 
 - (NSPoint)screenOffset {
-#if 0
-	if (!notificationCenter) {
-		NSArray *windowList = (__bridge NSArray *)CGWindowListCopyWindowInfo(listOptions, kCGNullWindowID);
-		for (NSDictionary *window in windowList) {
-			//Notification center level 25 size 0x0
+	NSString *window_server = @"Window Server";
+	NSString *backstop_menubar = @"Backstop Menubar";
 
-			if ([[window objectForKey:(__bridge NSString *)kCGWindowOwnerName] isEqualToString:@"Notification Center"] &&
-				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Width"]  intValue] == 0 &&
-				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Height"] intValue] == 0 &&
-				[[window objectForKey:(__bridge NSString *)kCGWindowLayer] intValue] == 25 &&
-				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"X"] intValue] == [[NSScreen mainScreen] frame].size.width &&
-				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Y"] intValue] == 0) {
-				//It's our notif center
+    CFArrayRef windows = CGWindowListCopyWindowInfo( kCGWindowListOptionOnScreenOnly, kCGNullWindowID );
+    CFIndex i, n;
 
-				notificationCenter = [[window objectForKey:(__bridge NSString *)kCGWindowNumber] intValue];
-			}
-		}
-	}
+    bool show = false;
+	NSPoint offset = NSMakePoint(NAN, NAN);
 
-    if (notificationCenter) {
-        NSArray *info = (__bridge NSArray *)CGWindowListCopyWindowInfo(kCGWindowListOptionIncludingWindow, notificationCenter);
-		if ([info count]) {
-			NSDictionary *bounds = [[info objectAtIndex:0] objectForKey:(__bridge NSString *)kCGWindowBounds];
-			return NSMakePoint([[bounds objectForKey:@"X"] intValue] - [[NSScreen mainScreen] frame].size.width, 0);
-		}
+    for (i = 0, n = CFArrayGetCount(windows); i < n; i++) {
+        CFDictionaryRef windict = CFArrayGetValueAtIndex(windows, i);
+        CFStringRef name = CFDictionaryGetValue(windict, kCGWindowOwnerName);
+
+        if ([window_server compare:(__bridge NSString*)name] == 0) {
+            name = CFDictionaryGetValue(windict, kCGWindowName);
+            if ([backstop_menubar compare:(__bridge NSString*)name] == 0) {
+                show = true;
+				NSDictionary *pos = (__bridge NSDictionary *)CFDictionaryGetValue(windict, kCGWindowBounds);
+				offset = NSMakePoint(((NSNumber *)[pos objectForKey:@"X"]).intValue, ((NSNumber *)[pos objectForKey:@"Y"]).intValue);
+            }
+
+        }
+        if (show) break;
     }
-#endif
-    return NSMakePoint(0, 0);
+
+    CFRelease(windows);
+
+    return offset;
 }
 
 #pragma mark Window Image Methods
@@ -225,25 +225,6 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 	// Default to creating a screen shot. Do this after our return since the previous request
 	// to refresh the window list will set it to nothing due to the interactions with KVO.
 	[self performSelectorOnMainThread:@selector(createScreenShot) withObject:self waitUntilDone:NO];
-
-    notificationCenter = 0;
-    NSArray *windowList = (__bridge NSArray *)CGWindowListCopyWindowInfo(listOptions, kCGNullWindowID);
-    for (NSDictionary *window in windowList) {
-        //Notification center level 25 size 0x0
-
-        if ([[window objectForKey:(__bridge NSString *)kCGWindowOwnerName] isEqualToString:@"Notification Center"] &&
-            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Width"]  intValue] == 0 &&
-            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Height"] intValue] == 0 &&
-            [[window objectForKey:(__bridge NSString *)kCGWindowLayer] intValue] == 25 &&
-            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"X"] intValue] == [[NSScreen mainScreen] frame].size.width &&
-            [[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Y"] intValue] == 0) {
-            //It's our notif center
-
-            notificationCenter = [[window objectForKey:(__bridge NSString *)kCGWindowNumber] intValue];
-        }
-    }
-
-	CFRelease((__bridge CFArrayRef)windowList);
 
     return self;
 }

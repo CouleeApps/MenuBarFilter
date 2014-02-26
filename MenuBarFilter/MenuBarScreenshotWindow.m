@@ -127,7 +127,11 @@
     if (self.image) {
         CGImageRef image = [self invertedImage];
         CGPoint offset = [self.controller screenOffset];
-        dirtyRect = CGRectApplyAffineTransform(dirtyRect, CGAffineTransformMakeTranslation(-offset.x, offset.y));
+		if (isnan(offset.x)) {
+			//Oops
+			return;
+		}
+        dirtyRect = CGRectApplyAffineTransform(dirtyRect, CGAffineTransformMakeTranslation(-offset.x, self.frame.size.height - offset.y + 1));
         CGContextDrawImage(ref, dirtyRect, image);
     }
     [super drawRect:dirtyRect];

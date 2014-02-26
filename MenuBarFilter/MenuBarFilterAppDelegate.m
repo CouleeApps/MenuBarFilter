@@ -166,7 +166,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     // I observed this event code on 10.8. No idea if this is valid for other versions of OSX, YMMV.
     CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, CGSConnectionNotifyEventMissionControl, (__bridge void *)(self));
 
-#if 1
+#if 0
     // I used this to spy on the spaces events
     for (int i = 0; i < 2048; i++) {
         CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, i, (__bridge void *)(self));
@@ -280,6 +280,12 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
 - (void) showFilter {
     if (!visible) {
+		CGPoint offset = [controller screenOffset];
+		if (isnan(offset.x)) {
+			//Oops
+			[self hideFilter];
+			return;
+		}
         if ([self filterWindowsBroken]) {
             [screenshotWindow orderFrontRegardless];
             [borderWindow orderFrontRegardless];
