@@ -181,18 +181,29 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     if (inMissionControl)
         return;
 
+	float x = 0;
+	float width = 0;
+//	BOOL main = NO;
+	for (NSScreen *screen in [NSScreen screens]) {
+		width += screen.frame.size.width;
+		if (![screen isEqual:[NSScreen mainScreen]])
+			x -= screen.frame.size.width;
+	}
+
     NSRect frame = [[NSScreen mainScreen] frame];
     NSRect vframe = [[NSScreen mainScreen] visibleFrame];
 	NSRect borderFrame = [[NSScreen mainScreen] visibleFrame];
 
     NSLog(@"frame o=%f h=%f, vframe o=%f h=%f", frame.origin.y, frame.size.height, vframe.origin.y, vframe.size.height);
 
+	frame.size.width = width;
+	frame.origin.x = x;
     frame.origin.y = vframe.size.height + vframe.origin.y + 1;
     frame.size.height -= (vframe.size.height + vframe.origin.y);
 
     //GS- This doesn't automatically fix itself, and I hate the one pixel border that shows up
     if ([self filterWindowsBroken])
-        frame.size.height -= (1.0 / [[NSScreen mainScreen] backingScaleFactor]);
+        frame.size.height --;
 
 	borderFrame.origin.y = frame.origin.y - 1;
 	borderFrame.size.height = 1;
@@ -269,6 +280,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
             [borderWindow orderFrontRegardless];
         }
         visible = YES;
+		[self reposition];
     }
 }
 
