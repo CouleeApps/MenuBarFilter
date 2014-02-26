@@ -243,6 +243,8 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
         }
     }
 
+	CFRelease((__bridge CFArrayRef)windowList);
+
     return self;
 }
 

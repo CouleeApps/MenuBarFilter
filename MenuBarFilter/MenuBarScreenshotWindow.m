@@ -129,7 +129,6 @@
         CGPoint offset = [self.controller screenOffset];
         dirtyRect = CGRectApplyAffineTransform(dirtyRect, CGAffineTransformMakeTranslation(-offset.x, offset.y));
         CGContextDrawImage(ref, dirtyRect, image);
-        CFRelease(image);
     }
     [super drawRect:dirtyRect];
 }
@@ -218,6 +217,9 @@
     // get a CG image from the context, wrap that into a
     // UIImage
     CGImageRef cgImage = CGBitmapContextCreateImage(context);
+
+	CFAutorelease(cgImage);
+	CFRelease(context);
 
     return cgImage;
 }
