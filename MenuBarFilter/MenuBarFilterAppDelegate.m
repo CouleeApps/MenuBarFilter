@@ -41,6 +41,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
         default:
             NSLog(@"space_callback! ptr=%p %d %d %d", ptr, data1, data2, data3);
+			[self checkForFullScreen:NULL];
     }
 }
 
@@ -165,7 +166,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     // I observed this event code on 10.8. No idea if this is valid for other versions of OSX, YMMV.
     CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, CGSConnectionNotifyEventMissionControl, (__bridge void *)(self));
 
-#if 0
+#if 1
     // I used this to spy on the spaces events
     for (int i = 0; i < 2048; i++) {
         CGSRegisterConnectionNotifyProc(_CGSDefaultConnection(), spaces_callback, i, (__bridge void *)(self));
@@ -184,6 +185,8 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 - (void) reposition {
     if (inMissionControl)
         return;
+	if (!visible)
+		return;
 
 	float x = 0;
 	float width = 0;
