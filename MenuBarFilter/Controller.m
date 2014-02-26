@@ -103,8 +103,10 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 - (NSPoint)screenOffset {
     if (notificationCenter) {
         NSArray *info = (__bridge NSArray *)CGWindowListCopyWindowInfo(kCGWindowListOptionIncludingWindow, notificationCenter);
-        NSDictionary *bounds = [[info objectAtIndex:0] objectForKey:(__bridge NSString *)kCGWindowBounds];
-        return NSMakePoint([[bounds objectForKey:@"X"] intValue] - [[NSScreen mainScreen] frame].size.width, 0);
+		if ([info count]) {
+			NSDictionary *bounds = [[info objectAtIndex:0] objectForKey:(__bridge NSString *)kCGWindowBounds];
+			return NSMakePoint([[bounds objectForKey:@"X"] intValue] - [[NSScreen mainScreen] frame].size.width, 0);
+		}
     }
     return NSMakePoint(0, 0);
 }
