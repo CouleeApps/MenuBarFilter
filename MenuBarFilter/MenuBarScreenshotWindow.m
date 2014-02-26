@@ -160,59 +160,54 @@
             // isn't zero, of course) to get uninflected RGB. We
             // multiply by 255 to keep precision while still using
             // integers
-            int _r, _g, _b;
             if (linePointer[3]) {
-                _r = linePointer[0];
-                _g = linePointer[1];
-                _b = linePointer[2];
-            } else
-                _r = _g = _b = 0;
 
-            // perform the colour inversion
-            _r = 255 - _r;
-            _g = 255 - _g;
-            _b = 255 - _b;
+				//Suuuper lazy define makes my life easier
+#define r linePointer[0]
+#define g linePointer[1]
+#define b linePointer[2]
+#define c linePointer
 
-            float r = _r / 255.0f, g = _g / 255.0f, b = _b / 255.0f;
+				// perform the colour inversion
+				r = 255 - r;
+				g = 255 - g;
+				b = 255 - b;
 
-            if (r != g || r != b || g != b) {
-                float cMax = MAX(MAX(r, g), b);
-                float cMin = MIN(MIN(r, g), b);
-                float delta = cMax - cMin;
+				//Super cool actually investigating this rather than just using a hue/saturation calculation
+				//Much faster this way as well
+				//
+				//39A33B -> A339A1
+				// (57, 163, 59) -> (163, 57, 161); 161 = (163 -  59) + 57
+				//CCA539 -> 3960CC
+				//(204, 165, 57) ->  (57, 96, 204);  96 = (204 - 165) + 57
 
-                float h = 0, s = 0, l = (cMax + cMin) / 2.f;
+				//So what it looks like is:
+				//<r, g, b> -> <r1, g1, b1>
+				//max   = max(r, g, b)
+				//min   = min(r, g, b)
+				//other = whichever isn't above
+				//
+				//<max>1 = min
+				//<min>1 = max
+				//<other> = (max - other) + min
 
-                if (cMax == r) h = 60.f * _mod(((g-b)/delta), 6.f);
-                if (cMax == g) h = 60.f *      ((b-r)/delta + 2.f);
-                if (cMax == b) h = 60.f *      ((r-g)/delta + 4.f);
-                
-                if (delta == 0) s = 0.f;
-                else s = delta/(1 - _abs((2.f * l) - 1.f));
+				//Which color index is the largest or smallest?
+				int max   = r > g ? (r > b ? 0 : 2) : (g > b ? 1 : 2);
+				int min   = r < g ? (r < b ? 0 : 2) : (g < b ? 1 : 2);
 
-                h += 180.f;
-                h = _mod(h, 360.f);
+				//Which one did we not get?
+				int other = (max + min == 1 ? 2 : (max + min == 3 ? 0 : 1));
 
-                float c =     (1.f - _abs((2.f * l) - 1.f)) * s;
-                float x = c * (1.f - _abs(_mod(h / 60.f, 2.f) - 1.f));
-                float m = l - (c / 2.f);
+				//Calculate c[other] (probably a cleaner way to do this)
+				c[other] = (c[max] - c[other]) + c[min];
 
-                if      (h < 60)  r = c + m, g = x + m, b = m;
-                else if (h < 120) r = x + m, g = c + m, b = m;
-                else if (h < 180) r = m,     g = c + m, b = x + m;
-                else if (h < 240) r = m,     g = x + m, b = c + m;
-                else if (h < 300) r = x + m, g = m,     b = c + m;
-                else if (h < 360) r = c + m, g = m,     b = x + m;
-                else              r = m,     g = m,     b = m;
-            }
+				//Save it because we can't just forget the value
+				int cmax = c[max];
 
-            _r = (int)(r * 255), _g = (int)(g * 255), _b = (int)(b * 255);
-
-            // multiply by alpha again, divide by 255 to undo the
-            // scaling before, store the new values and advance
-            // the pointer we're reading pixel data from
-            linePointer[0] = _r;
-            linePointer[1] = _g;
-            linePointer[2] = _b;
+				//Swap the two of them
+				c[max] = c[min];
+				c[min] = cmax;
+			}
             linePointer += 4;
         }
     }
@@ -224,15 +219,6 @@
     CGImageRef cgImage = CGBitmapContextCreateImage(context);
 
     return cgImage;
-}
-
-float _mod(float f, float m) {
-    if (f > INT_MAX) return fmodf(f, m);
-    return ((f / m) - (float)(int)(f / m)) * m;
-}
-
-float _abs(float f) {
-    return f * (f >= 0 ? 1 : -1);
 }
 
 @end
