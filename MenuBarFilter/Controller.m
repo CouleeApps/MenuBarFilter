@@ -101,6 +101,25 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 }
 
 - (NSPoint)screenOffset {
+#if 0
+	if (!notificationCenter) {
+		NSArray *windowList = (__bridge NSArray *)CGWindowListCopyWindowInfo(listOptions, kCGNullWindowID);
+		for (NSDictionary *window in windowList) {
+			//Notification center level 25 size 0x0
+
+			if ([[window objectForKey:(__bridge NSString *)kCGWindowOwnerName] isEqualToString:@"Notification Center"] &&
+				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Width"]  intValue] == 0 &&
+				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Height"] intValue] == 0 &&
+				[[window objectForKey:(__bridge NSString *)kCGWindowLayer] intValue] == 25 &&
+				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"X"] intValue] == [[NSScreen mainScreen] frame].size.width &&
+				[[[window objectForKey:(__bridge NSString *)kCGWindowBounds] objectForKey:@"Y"] intValue] == 0) {
+				//It's our notif center
+
+				notificationCenter = [[window objectForKey:(__bridge NSString *)kCGWindowNumber] intValue];
+			}
+		}
+	}
+
     if (notificationCenter) {
         NSArray *info = (__bridge NSArray *)CGWindowListCopyWindowInfo(kCGWindowListOptionIncludingWindow, notificationCenter);
 		if ([info count]) {
@@ -108,6 +127,7 @@ uint32_t ChangeBits(uint32_t currentBits, uint32_t flagsToChange, BOOL setFlags)
 			return NSMakePoint([[bounds objectForKey:@"X"] intValue] - [[NSScreen mainScreen] frame].size.width, 0);
 		}
     }
+#endif
     return NSMakePoint(0, 0);
 }
 
