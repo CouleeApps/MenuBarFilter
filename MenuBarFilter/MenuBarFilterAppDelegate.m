@@ -123,6 +123,10 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
         //GS- Have the controller output to the menu bar
         controller.outputView = screenshotWindow.view;
+
+		// create border overlay
+        borderWindow = [[MenuBarFilterWindow alloc] init];
+        [borderWindow setBackgroundColor: NSColor.blackColor];
     }
 
     // add observer for screen changes
@@ -212,6 +216,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
     if ([self filterWindowsBroken]) {
         [screenshotWindow setFrame:frame display:NO];
+        [borderWindow setFrame:borderFrame display:NO];
     } else {
         [hueWindow setFrame:frame display:NO];
         [invertWindow setFrame:frame display:NO];
@@ -274,6 +279,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     if (!visible) {
         if ([self filterWindowsBroken]) {
             [screenshotWindow orderFrontRegardless];
+            [borderWindow orderFrontRegardless];
         } else {
             [invertWindow orderFrontRegardless];
             [hueWindow orderFrontRegardless];
@@ -288,6 +294,7 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     if (visible) {
         if ([self filterWindowsBroken]) {
             [screenshotWindow orderOut:nil];
+            [borderWindow orderOut:nil];
         } else {
             [hueWindow orderOut:nil];
             [invertWindow orderOut:nil];
