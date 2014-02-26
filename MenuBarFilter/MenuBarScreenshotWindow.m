@@ -70,7 +70,8 @@
         [thread start];
 
         eventHandler = [NSEvent addGlobalMonitorForEventsMatchingMask:NSLeftMouseDownMask | NSRightMouseDownMask | NSLeftMouseUpMask | NSRightMouseUpMask handler:^(NSEvent * mouseEvent) {
-            [self performSelector:@selector(update) onThread:thread withObject:nil waitUntilDone:NO];
+			if ([[mouseEvent window] convertBaseToScreen:[mouseEvent locationInWindow]].y < self.frame.size.height)
+				[self performSelector:@selector(update) onThread:thread withObject:nil waitUntilDone:NO];
         }];
     }
     return self;
@@ -89,7 +90,7 @@
                     [self update];
                 }
             }
-        usleep(100000);
+        usleep(200000);
     }
 }
 
