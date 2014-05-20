@@ -26,16 +26,21 @@
 @implementation MenuBarScreenshotWindow
 @synthesize controller;
 
-- (id) init {
-    self = [self initWithContentRect:[[NSScreen mainScreen] frame]
+- (id)init {
+	return [self initWithScreen:[NSScreen mainScreen]];
+}
+
+- (id) initWithScreen:(NSScreen *)screen {
+    self = [self initWithContentRect:[screen frame]
                            styleMask:NSBorderlessWindowMask
                              backing:NSBackingStoreBuffered
-                               defer:NO];
+                               defer:NO
+							  screen:screen];
     if ( self != nil ) {
         [self setHidesOnDeactivate:NO];
         [self setCanHide:NO];
         [self setIgnoresMouseEvents:YES];
-        [self setOpaque: NO];
+        [self setOpaque: YES];
         [self setBackgroundColor:[NSColor colorWithDeviceWhite:1.0 alpha:0.0]];
 
         //GS- +2 so it can capture Cloud as well
@@ -48,7 +53,7 @@
 
         window = (CGSWindow)[self windowNumber];
 
-        self.view = [[MenuBarScreenshotView alloc] initWithFrame:[[NSScreen mainScreen] frame]];
+        self.view = [[MenuBarScreenshotView alloc] initWithScreen:screen];
         [self setContentView:self.view];
 
 //        //Load the filters
@@ -113,13 +118,41 @@
     return self;
 }
 
+- (id)initWithScreen:(NSScreen *)screen {
+	if (self = [super initWithFrame:[screen frame]]) {
+		self.screen = screen;
+
+		xOffset = 0.0f;
+		//Get screen pos
+		for (NSScreen *allscreen in [NSScreen screens]) {
+			if (allscreen.frame.origin.x <= screen.frame.origin.x) {
+				xOffset -= allscreen.frame.origin.x;
+			}
+		}
+
+		self.image = nil;
+	}
+	return self;
+}
+
 - (void)setImage:(CGImageRef)image {
     @synchronized (self) {
         if (_image)
             CFRelease(_image);
-        _image = CGImageCreateWithImageInRect(image, CGRectApplyAffineTransform(self.frame, CGAffineTransformMakeScale(CGImageGetWidth(image) / self.frame.size.width, CGImageGetWidth(image) / self.frame.size.width)));
-    }
-    [self setNeedsDisplay:YES];
+
+		CGRect frame = self.frame;
+		frame = CGRectApplyAffineTransform(frame, CGAffineTransformMakeTranslation(xOffset, 0.0));
+
+		//Easy way to tell if the screen is retina
+		if (frame.size.height != CGImageGetHeight(image)) {
+			CGFloat scale = MAX(1, MIN(2, (CGImageGetHeight(image) / frame.size.height)));
+			frame = CGRectApplyAffineTransform(frame, CGAffineTransformMakeScale(scale, scale));
+		}
+
+        _image = CGImageCreateWithImageInRect(image, frame);
+
+        [self setNeedsDisplay:YES];
+	}
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
@@ -211,6 +244,10 @@
 				//Swap the two of them
 				c[max] = c[min];
 				c[min] = cmax;
+#undef r
+#undef g
+#undef b
+#undef c
 			}
             linePointer += 4;
         }

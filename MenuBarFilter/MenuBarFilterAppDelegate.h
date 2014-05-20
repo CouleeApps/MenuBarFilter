@@ -26,13 +26,13 @@
 @interface MenuBarFilterAppDelegate : NSObject <NSApplicationDelegate> {
 
     IBOutlet NSMenu *statusMenu;
-    IBOutlet Controller *controller;
 
 @private
-    MenuBarFilterWindow * invertWindow;
-    MenuBarFilterWindow * hueWindow;
-	 MenuBarFilterWindow * borderWindow;
-    MenuBarScreenshotWindow * screenshotWindow;
+	NSMutableArray *hueWindows;
+	NSMutableArray *invertWindows;
+	NSMutableArray *screenshotWindows;
+	NSMutableArray *borderWindows;
+    NSMutableArray *controllers;
     BOOL visible;
     BOOL inMissionControl;
     id eventMonitor;

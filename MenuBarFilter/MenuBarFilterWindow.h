@@ -27,6 +27,7 @@
 	CGSWindowFilterRef filter;
 }
 
+- (id)initWithScreen:(NSScreen *)screen;
 - (void) setFilter:(NSString *)filterName;
 - (void) setFilterValues:(NSDictionary *)filterValues;
 

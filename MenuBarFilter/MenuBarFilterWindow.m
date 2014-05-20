@@ -30,11 +30,16 @@ CGSConnection connection;
     connection = _CGSDefaultConnection();
 }
 
-- (id) init {
-    self = [self initWithContentRect:[[NSScreen mainScreen] frame]
+- (id)init {
+	return [self initWithScreen:[NSScreen mainScreen]];
+}
+
+- (id) initWithScreen:(NSScreen *)screen {
+    self = [self initWithContentRect:[screen frame]
                            styleMask:NSBorderlessWindowMask
                              backing:NSBackingStoreBuffered
-                               defer:NO];
+                               defer:NO
+							  screen:screen];
     if ( self != nil ) {
         [self setHidesOnDeactivate:NO];
         [self setCanHide:NO];

@@ -68,68 +68,92 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
     return (osMajor == 10 && osMinor >= 9) || osMajor > 10 /* Future compatibility */;
 }
 
+- (void)updateScreens {
+	for (int i = 0; i < [NSScreen screens].count; i ++) {
+		NSScreen *screen = [NSScreen screens][i];
+
+		//GS- All of this is broken in Mavericks.
+		if (![self filterWindowsBroken]) {
+			NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
+			NSDictionary *appDefaults = [NSMutableDictionary dictionary];
+
+			// defaults write org.wezfurlong.MenuBarFilter enableMenu NO
+			[appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"enableMenu"];
+
+			// defaults write org.wezfurlong.MenuBarFilter useHue NO
+			[appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
+
+			[defs registerDefaults:appDefaults];
+			[self enableMenuItem:[defs boolForKey:@"enableMenu"]];
+
+			// create invert overlay
+			MenuBarFilterWindow *invertWindow = [[MenuBarFilterWindow alloc] initWithScreen:screen];
+			[invertWindow setFilter:@"CIColorInvert"];
+
+			// create border overlay
+			MenuBarFilterWindow *borderWindow = [[MenuBarFilterWindow alloc] initWithScreen:screen];
+			[borderWindow setBackgroundColor: NSColor.blackColor];
+
+			MenuBarFilterWindow *hueWindow = [[MenuBarFilterWindow alloc] initWithScreen:screen];
+			if ([defs boolForKey:@"useHue"]) {
+				// create hue overlay
+				[hueWindow setFilter:@"CIHueAdjust"];
+				[hueWindow setFilterValues:
+				 [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:M_PI],
+				  @"inputAngle", nil]];
+			} else {
+				// de-saturation filter
+				[hueWindow setFilter:@"CIColorControls"];
+				[hueWindow setFilterValues:
+				 [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
+											 forKey: @"inputSaturation" ] ];
+				[hueWindow setFilterValues:
+				 [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
+											 forKey: @"inputBrightness" ] ];
+				[hueWindow setFilterValues:
+				 [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
+											 forKey: @"inputContrast" ] ];
+			}
+
+			[hueWindows addObject:hueWindow];
+			[invertWindows addObject:invertWindow];
+			[borderWindows addObject:borderWindow];
+		} else {
+			MenuBarScreenshotWindow *screenshotWindow = [[MenuBarScreenshotWindow alloc] initWithScreen:screen];
+
+			Controller *controller = [[Controller alloc] init];
+
+			//GS- Default values
+			[controller setWindowId:(CGSWindow)screenshotWindow.windowNumber];
+			[controller setSingleWindowOption:kSingleWindowBelowOnly];
+			[controller setTightFit:NO];
+
+			screenshotWindow.controller = controller;
+			screenshotWindow.view.controller = controller;
+
+
+			[controllers addObject:controller];
+			[screenshotWindows addObject:screenshotWindow];
+
+			//GS- Have the controller output to the menu bar
+			controller.outputView = screenshotWindow.view;
+
+			// create border overlay
+			MenuBarFilterWindow *borderWindow = [[MenuBarFilterWindow alloc] initWithScreen:screen];
+			[borderWindow setBackgroundColor: NSColor.blackColor];
+
+			[borderWindows addObject:borderWindow];
+		}
+	}
+}
+
 - (void) applicationDidFinishLaunching:(NSNotification *)notification {
-    //GS- All of this is broken in Mavericks.
-    if (![self filterWindowsBroken]) {
-        NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
-        NSDictionary *appDefaults = [NSMutableDictionary dictionary];
+	screenshotWindows = [@[] mutableCopy];
+	hueWindows = [@[] mutableCopy];
+	invertWindows = [@[] mutableCopy];
+	borderWindows = [@[] mutableCopy];
 
-        // defaults write org.wezfurlong.MenuBarFilter enableMenu NO
-        [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"enableMenu"];
-
-        // defaults write org.wezfurlong.MenuBarFilter useHue NO
-        [appDefaults setValue:[NSNumber numberWithBool:YES] forKey:@"useHue"];
-
-        [defs registerDefaults:appDefaults];
-        [self enableMenuItem:[defs boolForKey:@"enableMenu"]];
-
-        // create invert overlay
-        invertWindow = [[MenuBarFilterWindow alloc] init];
-        [invertWindow setFilter:@"CIColorInvert"];
-
-        // create border overlay
-        borderWindow = [[MenuBarFilterWindow alloc] init];
-        [borderWindow setBackgroundColor: NSColor.blackColor];
-
-        hueWindow = [[MenuBarFilterWindow alloc] init];
-        if ([defs boolForKey:@"useHue"]) {
-            // create hue overlay
-            [hueWindow setFilter:@"CIHueAdjust"];
-            [hueWindow setFilterValues:
-             [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:M_PI],
-              @"inputAngle", nil]];
-        } else {
-            // de-saturation filter
-            [hueWindow setFilter:@"CIColorControls"];
-            [hueWindow setFilterValues:
-             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
-                                         forKey: @"inputSaturation" ] ];
-            [hueWindow setFilterValues:
-             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:0.0]
-                                         forKey: @"inputBrightness" ] ];
-            [hueWindow setFilterValues:
-             [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat:1.0]
-                                         forKey: @"inputContrast" ] ];
-        }
-    } else {
-        screenshotWindow = [[MenuBarScreenshotWindow alloc] init];
-
-        //GS- Default values
-        [controller setWindowId:(CGSWindow)screenshotWindow.windowNumber];
-        [controller setSingleWindowOption:kSingleWindowBelowOnly];
-        [controller setTightFit:NO];
-
-        screenshotWindow.controller = controller;
-        screenshotWindow.view.controller = controller;
-
-        //GS- Have the controller output to the menu bar
-        controller.outputView = screenshotWindow.view;
-
-		// create border overlay
-        borderWindow = [[MenuBarFilterWindow alloc] init];
-        [borderWindow setBackgroundColor: NSColor.blackColor];
-    }
-
+	[self updateScreens];
     // add observer for screen changes
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(reposition)
@@ -188,43 +212,57 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 	if (!visible)
 		return;
 
-	float x = 0;
-	float width = 0;
-//	BOOL main = NO;
-	for (NSScreen *screen in [NSScreen screens]) {
-		width += screen.frame.size.width;
-		if (![screen isEqual:[NSScreen mainScreen]])
-			x -= screen.frame.size.width;
+	CGFloat tallest = 0.0f;
+	for (int i = 0; i < [NSScreen screens].count; i ++) {
+		NSScreen *screen = [NSScreen screens][i];
+
+		NSRect frame = [screen frame];
+		if (frame.size.height - frame.origin.y > tallest)
+			tallest = frame.size.height;
 	}
 
-    NSRect frame = [[NSScreen mainScreen] frame];
-    NSRect vframe = [[NSScreen mainScreen] visibleFrame];
-	NSRect borderFrame = [[NSScreen mainScreen] visibleFrame];
+	NSLog(@"Tallest screen is %f", tallest);
 
-    NSLog(@"frame o=%f h=%f, vframe o=%f h=%f", frame.origin.y, frame.size.height, vframe.origin.y, vframe.size.height);
+	for (int i = 0; i < [NSScreen screens].count; i ++) {
+		NSScreen *screen = [NSScreen screens][i];
 
-	frame.size.width = width;
-	frame.origin.x = x;
-    frame.origin.y = vframe.size.height + vframe.origin.y + 1;
-    frame.size.height -= (vframe.size.height + vframe.origin.y);
+		NSRect frame = [screen frame];
+		NSRect vframe = [screen visibleFrame];
+		NSRect borderFrame = [screen visibleFrame];
 
-    //GS- This doesn't automatically fix itself, and I hate the one pixel border that shows up
-    if ([self filterWindowsBroken])
-        frame.size.height --;
+		NSLog(@"frame o=%f h=%f, vframe o=%f h=%f", frame.origin.y, frame.size.height, vframe.origin.y, vframe.size.height);
 
-	borderFrame.origin.y = frame.origin.y - 1;
-	borderFrame.size.height = 1;
+		frame.origin.y = vframe.size.height + vframe.origin.y + 1;
+		frame.size.height -= (vframe.size.height + vframe.origin.y);
 
-    NSLog(@"Using %f %f", frame.origin.y, frame.size.height);
+		if ([screen frame].size.height < tallest) {
+			//GS- If we're not the tallest screen, then we need to offset to counter it
+			frame.size.height += (tallest - [screen frame].size.height);
+//			frame.origin.y -= (tallest - [screen frame].size.height);
+		}
+		
+		//GS- This doesn't automatically fix itself, and I hate the one pixel border that shows up
+		if ([self filterWindowsBroken])
+			frame.size.height --;
 
-    if ([self filterWindowsBroken]) {
-        [screenshotWindow setFrame:frame display:NO];
-        [borderWindow setFrame:borderFrame display:NO];
-    } else {
-        [hueWindow setFrame:frame display:NO];
-        [invertWindow setFrame:frame display:NO];
-        [borderWindow setFrame:borderFrame display:NO];
-    }
+		borderFrame.origin.y = frame.origin.y - 1;
+		borderFrame.size.height = 1;
+
+		NSLog(@"Using %f %f", frame.origin.y, frame.size.height);
+
+		borderFrame = [borderWindows[i] constrainFrameRect:borderFrame toScreen:screen];
+
+		if ([self filterWindowsBroken]) {
+			frame = [screenshotWindows[i] constrainFrameRect:frame toScreen:screen];
+			[screenshotWindows[i] setFrame:frame display:NO];
+			[borderWindows[i] setFrame:borderFrame display:NO];
+		} else {
+			frame = [invertWindows[i] constrainFrameRect:frame toScreen:screen];
+			[hueWindows[i] setFrame:frame display:NO];
+			[invertWindows[i] setFrame:frame display:NO];
+			[borderWindows[i] setFrame:borderFrame display:NO];
+		}
+	}
 }
 
 - (void) observeValueForKeyPath:(NSString *)keyPath
@@ -280,19 +318,23 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 
 - (void) showFilter {
     if (!visible) {
-		CGPoint offset = [controller screenOffset];
+		CGPoint offset = [controllers[0] screenOffset];
 		if (isnan(offset.x)) {
 			//Oops
 			[self hideFilter];
 			return;
 		}
         if ([self filterWindowsBroken]) {
-            [screenshotWindow orderFrontRegardless];
-            [borderWindow orderFrontRegardless];
+			for (int i = 0; i < [NSScreen screens].count; i ++) {
+				[screenshotWindows[i] orderFrontRegardless];
+				[borderWindows[i] orderFrontRegardless];
+			}
         } else {
-            [invertWindow orderFrontRegardless];
-            [hueWindow orderFrontRegardless];
-            [borderWindow orderFrontRegardless];
+			for (int i = 0; i < [NSScreen screens].count; i ++) {
+				[invertWindows[i] orderFrontRegardless];
+				[hueWindows[i] orderFrontRegardless];
+				[borderWindows[i] orderFrontRegardless];
+			}
         }
         visible = YES;
 		[self reposition];
@@ -302,12 +344,16 @@ static void spaces_callback(int data1, int data2, int data3, void *ptr)
 - (void) hideFilter {
     if (visible) {
         if ([self filterWindowsBroken]) {
-            [screenshotWindow orderOut:nil];
-            [borderWindow orderOut:nil];
+			for (int i = 0; i < [NSScreen screens].count; i ++) {
+				[screenshotWindows[i] orderOut:nil];
+				[borderWindows[i] orderOut:nil];
+			}
         } else {
-            [hueWindow orderOut:nil];
-            [invertWindow orderOut:nil];
-            [borderWindow orderOut:nil];
+			for (int i = 0; i < [NSScreen screens].count; i ++) {
+				[hueWindows[i] orderOut:nil];
+				[invertWindows[i] orderOut:nil];
+				[borderWindows[i] orderOut:nil];
+			}
         }
         visible = NO;
     }

@@ -34,13 +34,21 @@
 
 }
 
+- (id)initWithScreen:(NSScreen *)screen;
+
 @property (nonatomic, strong) MenuBarScreenshotView *view;
 @property (nonatomic, strong) NSView *filterView;
 @property (nonatomic, strong) Controller *controller;
 
 @end
 
-@interface MenuBarScreenshotView : NSView
-@property (nonatomic) Controller *controller;
+@interface MenuBarScreenshotView : NSView {
+	CGFloat xOffset;
+}
+
+- (id)initWithScreen:(NSScreen *)screen;
+
+@property (nonatomic, strong) NSScreen *screen;
+@property (nonatomic, strong) Controller *controller;
 @property (nonatomic) CGImageRef image;
 @end
